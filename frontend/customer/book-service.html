@@ -135,7 +135,7 @@
                     <div class="col-md-6">
                       <div class="border rounded p-3 h-100 bg-light">
                         <div class="form-check">
-                          <input class="form-check-input service-chk" type="checkbox" value="2999" id="pkgPeriodic" checked onchange="updateEstimatedCost()">
+                          <input class="form-check-input service-chk" type="checkbox" data-catalog-id="1" value="2999" id="pkgPeriodic" checked onchange="updateEstimatedCost()">
                           <label class="form-check-label fw-bold text-dark" for="pkgPeriodic">
                             Comprehensive Periodic Maintenance
                           </label>
@@ -147,7 +147,7 @@
                     <div class="col-md-6">
                       <div class="border rounded p-3 h-100 bg-light">
                         <div class="form-check">
-                          <input class="form-check-input service-chk" type="checkbox" value="1200" id="pkgBrakes" checked onchange="updateEstimatedCost()">
+                          <input class="form-check-input service-chk" type="checkbox" data-catalog-id="3" value="1200" id="pkgBrakes" checked onchange="updateEstimatedCost()">
                           <label class="form-check-label fw-bold text-dark" for="pkgBrakes">
                             Brake Inspection & Fluid Flush
                           </label>
@@ -159,7 +159,7 @@
                     <div class="col-md-6">
                       <div class="border rounded p-3 h-100 bg-light">
                         <div class="form-check">
-                          <input class="form-check-input service-chk" type="checkbox" value="950" id="pkgWheel" onchange="updateEstimatedCost()">
+                          <input class="form-check-input service-chk" type="checkbox" data-catalog-id="4" value="950" id="pkgWheel" onchange="updateEstimatedCost()">
                           <label class="form-check-label fw-bold text-dark" for="pkgWheel">
                             3D Wheel Alignment & Balancing
                           </label>
@@ -171,7 +171,7 @@
                     <div class="col-md-6">
                       <div class="border rounded p-3 h-100 bg-light">
                         <div class="form-check">
-                          <input class="form-check-input service-chk" type="checkbox" value="1450" id="pkgAC" onchange="updateEstimatedCost()">
+                          <input class="form-check-input service-chk" type="checkbox" data-catalog-id="5" value="1450" id="pkgAC" onchange="updateEstimatedCost()">
                           <label class="form-check-label fw-bold text-dark" for="pkgAC">
                             Air Conditioning & Cabin Disinfection
                           </label>
@@ -191,10 +191,10 @@
                   <div class="col-md-6">
                     <label for="bookingSlotTime" class="form-label-custom">Preferred Time Slot</label>
                     <select class="form-select form-select-custom" id="bookingSlotTime" required>
-                      <option value="09:00 AM">Morning 09:00 AM - 11:00 AM</option>
-                      <option value="11:30 AM" selected>Mid-Day 11:30 AM - 01:30 PM</option>
-                      <option value="02:30 PM">Afternoon 02:30 PM - 04:30 PM</option>
-                      <option value="05:00 PM">Evening 05:00 PM - 07:00 PM</option>
+                      <option value="09:00:00">Morning 09:00 AM - 11:00 AM</option>
+                      <option value="11:30:00" selected>Mid-Day 11:30 AM - 01:30 PM</option>
+                      <option value="14:30:00">Afternoon 02:30 PM - 04:30 PM</option>
+                      <option value="17:00:00">Evening 05:00 PM - 07:00 PM</option>
                     </select>
                   </div>
                 </div>

@@ -297,6 +297,34 @@ const CustomerModule = {
   },
 
   /**
+   * Helper: Convert any date and time input into clean ISO-8601 YYYY-MM-DDTHH:mm:ss
+   */
+  formatIsoDateTime(dateStr, timeStr) {
+    if (!dateStr) {
+      dateStr = new Date().toISOString().split('T')[0];
+    }
+    let formattedTime = "10:00:00";
+    if (timeStr) {
+      timeStr = timeStr.trim();
+      // Match 12-hour AM/PM format e.g. "11:30 AM", "02:30 PM"
+      const ampmMatch = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (ampmMatch) {
+        let h = parseInt(ampmMatch[1], 10);
+        const m = ampmMatch[2];
+        const mod = ampmMatch[3].toUpperCase();
+        if (mod === 'PM' && h < 12) h += 12;
+        if (mod === 'AM' && h === 12) h = 0;
+        formattedTime = `${String(h).padStart(2, '0')}:${m}:00`;
+      } else if (/^\d{2}:\d{2}:\d{2}$/.test(timeStr)) {
+        formattedTime = timeStr;
+      } else if (/^\d{2}:\d{2}$/.test(timeStr)) {
+        formattedTime = `${timeStr}:00`;
+      }
+    }
+    return `${dateStr}T${formattedTime}`;
+  },
+
+  /**
    * Bind Booking form submission to Spring Boot REST API
    */
   bindBookingForm() {
@@ -312,6 +340,18 @@ const CustomerModule = {
       const slotTime = document.getElementById('bookingSlotTime').value;
       const notes = (document.getElementById('bookingNotes') || {}).value || '';
 
+      // Collect selected service package catalog IDs
+      const checkedBoxes = document.querySelectorAll('.service-chk:checked');
+      const serviceCatalogIds = Array.from(checkedBoxes).map(chk => {
+        return parseInt(chk.getAttribute('data-catalog-id') || '1', 10);
+      });
+
+      if (serviceCatalogIds.length === 0) {
+        serviceCatalogIds.push(1);
+      }
+
+      const isoSlot = this.formatIsoDateTime(slotDate, slotTime);
+
       const submitBtn = form.querySelector('button[type="submit"]');
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -322,8 +362,8 @@ const CustomerModule = {
         if (!SVS_CONFIG.USE_MOCK_DATA) {
           const payload = {
             vehicleId: vehicleId,
-            serviceCatalogIds: [1], // Comprehensive Periodic Maintenance
-            preferredSlot: `${slotDate}T${slotTime}:00`,
+            serviceCatalogIds: serviceCatalogIds,
+            preferredSlot: isoSlot,
             customerNotes: notes
           };
           const res = await apiRequest('/bookings', 'POST', payload);
@@ -337,7 +377,8 @@ const CustomerModule = {
         }, 800);
       } catch (err) {
         console.error('Failed to book service', err);
-        Toast.error(err.message || 'Failed to book service appointment');
+        const errMsg = (err && (err.message || err.error)) ? (err.message || err.error) : 'Failed to book service appointment';
+        Toast.error(errMsg);
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i> Confirm Booking';
