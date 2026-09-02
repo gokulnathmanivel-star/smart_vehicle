@@ -53,6 +53,12 @@ const MechanicModule = {
         }))
       ];
 
+      // Update top bar badge dynamically
+      const badgeEl = document.getElementById('assignedJobsBadge');
+      if (badgeEl) {
+        badgeEl.textContent = `${allJobs.length} Active Orders`;
+      }
+
       if (allJobs.length === 0) {
         container.innerHTML = `
           <div class="col-12 empty-state-box">

@@ -4,6 +4,10 @@ import com.svsbas.modules.booking.entity.BookingServiceJunction;
 import com.svsbas.modules.booking.entity.BookingStatus;
 import com.svsbas.modules.booking.entity.ServiceBooking;
 import com.svsbas.modules.booking.repository.ServiceBookingRepository;
+import com.svsbas.modules.breakdown.entity.BreakdownRequest;
+import com.svsbas.modules.breakdown.entity.BreakdownStatus;
+import com.svsbas.modules.breakdown.entity.BreakdownType;
+import com.svsbas.modules.breakdown.repository.BreakdownRequestRepository;
 import com.svsbas.modules.catalog.entity.ServiceCatalogItem;
 import com.svsbas.modules.catalog.entity.ServiceCategory;
 import com.svsbas.modules.catalog.repository.ServiceCatalogRepository;
@@ -24,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Configuration
 public class DataInitializer {
@@ -37,6 +42,7 @@ public class DataInitializer {
             ServiceCatalogRepository catalogRepository,
             MechanicProfileRepository mechanicProfileRepository,
             ServiceBookingRepository bookingRepository,
+            BreakdownRequestRepository breakdownRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
             // 1. Seed Users
@@ -99,28 +105,35 @@ public class DataInitializer {
                 item3 = catalogRepository.findByServiceCode("SVC-BRK-03").orElse(null);
             }
 
-            // 3. Seed Initial Service Bookings
+            // 3. Seed Initial Workshop Service Bookings assigned to Vikram Singh
             if (bookingRepository.count() == 0 && customer != null && v1 != null && item1 != null) {
-                ServiceBooking b1 = new ServiceBooking(v1, customer, LocalDateTime.now().plusDays(5).withHour(11).withMinute(30).withSecond(0));
-                b1.setCustomerNotes("Periodic 30,000 km checkup and brake squeal inspection.");
-                b1.setStatus(BookingStatus.REQUESTED);
+                ServiceBooking b1 = new ServiceBooking(v1, customer, LocalDateTime.now().plusDays(2).withHour(10).withMinute(30).withSecond(0));
+                b1.setBookingRef("SB-2026-0819");
+                b1.setCustomerNotes("Scheduled 30,000 km periodic service + slight brake squeal");
+                b1.setMechanic(mechanic);
+                b1.setStatus(BookingStatus.IN_PROGRESS);
                 b1.setEstimatedCost(item1.getBasePrice());
                 BookingServiceJunction j1 = new BookingServiceJunction(b1, item1, item1.getBasePrice());
                 b1.getServices().add(j1);
                 bookingRepository.save(b1);
+                logger.info("Seeded active workshop booking SB-2026-0819 assigned to Vikram Singh");
+            }
 
-                if (v2 != null && item3 != null) {
-                    ServiceBooking b2 = new ServiceBooking(v2, customer, LocalDateTime.now().plusDays(2).withHour(14).withMinute(30).withSecond(0));
-                    b2.setCustomerNotes("Brake pad inspection and fluid flush.");
-                    b2.setMechanic(mechanic);
-                    b2.setStatus(BookingStatus.ASSIGNED);
-                    b2.setEstimatedCost(item3.getBasePrice());
-                    BookingServiceJunction j2 = new BookingServiceJunction(b2, item3, item3.getBasePrice());
-                    b2.getServices().add(j2);
-                    bookingRepository.save(b2);
-                }
-
-                logger.info("Seeded 2 initial workshop service bookings");
+            // 4. Seed Initial Emergency Roadside SOS Dispatch assigned to Vikram Singh
+            if (breakdownRepository.count() == 0 && customer != null && v2 != null) {
+                BreakdownRequest br1 = new BreakdownRequest();
+                br1.setSosRef("SOS-2026-0902-881");
+                br1.setCustomer(customer);
+                br1.setVehicle(v2);
+                br1.setBreakdownType(BreakdownType.FLAT_TYRE);
+                br1.setCustomerLatitude(12.9562);
+                br1.setCustomerLongitude(77.7019);
+                br1.setLocationAddress("Outer Ring Road, Near Marathahalli Bridge, Bengaluru");
+                br1.setStatus(BreakdownStatus.MECHANIC_EN_ROUTE);
+                br1.setMechanic(mechanic);
+                br1.setAssignedAt(LocalDateTime.now().minusMinutes(14));
+                breakdownRepository.save(br1);
+                logger.info("Seeded active emergency SOS SOS-2026-0902-881 assigned to Vikram Singh");
             }
         };
     }
