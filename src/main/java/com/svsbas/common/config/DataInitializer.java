@@ -119,8 +119,9 @@ public class DataInitializer {
                 logger.info("Seeded active workshop booking SB-2026-0819 assigned to Vikram Singh");
             }
 
-            // 4. Seed Initial Emergency Roadside SOS Dispatch assigned to Vikram Singh
+            // 4. Seed Initial Emergency Roadside SOS Dispatches
             if (breakdownRepository.count() == 0 && customer != null && v2 != null) {
+                // Incident 1: Active and assigned to Vikram Singh (En Route)
                 BreakdownRequest br1 = new BreakdownRequest();
                 br1.setSosRef("SOS-2026-0902-881");
                 br1.setCustomer(customer);
@@ -133,7 +134,36 @@ public class DataInitializer {
                 br1.setMechanic(mechanic);
                 br1.setAssignedAt(LocalDateTime.now().minusMinutes(14));
                 breakdownRepository.save(br1);
-                logger.info("Seeded active emergency SOS SOS-2026-0902-881 assigned to Vikram Singh");
+
+                // Incident 2: Unassigned / Pending Dispatch (Awaiting Admin Dispatch)
+                if (v1 != null) {
+                    BreakdownRequest br2 = new BreakdownRequest();
+                    br2.setSosRef("SOS-2026-0902-882");
+                    br2.setCustomer(customer);
+                    br2.setVehicle(v1);
+                    br2.setBreakdownType(BreakdownType.BATTERY_DEAD);
+                    br2.setCustomerLatitude(12.9784);
+                    br2.setCustomerLongitude(77.6408);
+                    br2.setLocationAddress("Indiranagar 100ft Road, Bengaluru");
+                    br2.setStatus(BreakdownStatus.DISPATCHED);
+                    breakdownRepository.save(br2);
+                }
+
+                // Incident 3: Towed / Workshop Intake
+                BreakdownRequest br3 = new BreakdownRequest();
+                br3.setSosRef("SOS-2026-0901-729");
+                br3.setCustomer(customer);
+                br3.setVehicle(v2);
+                br3.setBreakdownType(BreakdownType.ENGINE_OVERHEAT);
+                br3.setCustomerLatitude(12.8452);
+                br3.setCustomerLongitude(77.6602);
+                br3.setLocationAddress("Electronic City Phase 1 Toll, Bengaluru");
+                br3.setStatus(BreakdownStatus.TOW_REQUIRED);
+                br3.setMechanic(mechanic);
+                br3.setAssignedAt(LocalDateTime.now().minusHours(5));
+                breakdownRepository.save(br3);
+
+                logger.info("Seeded 3 emergency SOS incidents (En Route, Pending Dispatch, Towed)");
             }
         };
     }

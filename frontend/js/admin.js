@@ -11,6 +11,7 @@ const AdminModule = {
     { id: 2, fullName: 'Deepak', phone: '8464392875', specialization: 'Engine Developer', currentStatus: 'IDLE', rating: 5.0, activeJobs: 0 }
   ],
 
+  mockBreakdowns: [],
   mockCatalog: [],
   mockCustomers: [],
 
@@ -21,7 +22,9 @@ const AdminModule = {
     await this.renderMechanicsList();
     await this.renderCatalogList();
     await this.renderCustomersList();
+    await this.renderBreakdownRequests();
     this.bindAddMechanicForm();
+    this.bindDispatchForm();
   },
 
   /**
@@ -140,6 +143,333 @@ const AdminModule = {
   },
 
   /**
+   * Render complete breakdown incident queue in breakdown-requests.html
+   */
+  async renderBreakdownRequests() {
+    const tableBody = document.getElementById('adminBreakdownTableBody');
+    if (!tableBody) return;
+
+    try {
+      let breakdowns = [];
+      if (!SVS_CONFIG.USE_MOCK_DATA) {
+        const res = await apiRequest('/breakdowns');
+        breakdowns = (res && res.data) ? res.data : [];
+      } else {
+        breakdowns = this.mockBreakdowns;
+      }
+
+      this.cachedBreakdowns = breakdowns;
+
+      if (!breakdowns || breakdowns.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No emergency breakdown requests in queue.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = breakdowns.map(b => {
+        const isEnRoute = b.status === 'MECHANIC_EN_ROUTE';
+        const isDispatched = b.status === 'DISPATCHED';
+        const isTowed = b.status === 'TOW_REQUIRED';
+        const isResolved = b.status === 'RESOLVED';
+
+        const rowClass = isEnRoute ? 'table-danger-subtle' : '';
+
+        const lat = b.customerLatitude ? b.customerLatitude.toFixed(4) : '12.9562';
+        const lng = b.customerLongitude ? b.customerLongitude.toFixed(4) : '77.7019';
+
+        let unitHtml = '';
+        if (b.mechanicName) {
+          unitHtml = `
+            <div class="fw-bold text-dark">${b.mechanicName}</div>
+            <small class="text-success fw-semibold"><i class="fas fa-motorcycle me-1"></i>En Route (ETA ~${b.etaMinutes || 10}m)</small>
+          `;
+        } else {
+          unitHtml = `
+            <span class="badge bg-warning-subtle text-dark">Unassigned (Pending)</span>
+            <small class="text-muted d-block">Suggested: Vikram Singh</small>
+          `;
+        }
+
+        let actionBtn = '';
+        if (isEnRoute) {
+          actionBtn = `<button class="btn btn-sm btn-outline-danger me-1" onclick="AdminModule.openTelemetryModal(${b.id})"><i class="fas fa-satellite-dish me-1"></i>Telemetry</button>`;
+        } else if (isDispatched && !b.mechanicName) {
+          actionBtn = `
+            <button class="btn btn-sm btn-danger" onclick="AdminModule.openDispatchModal(${b.id})">
+              <i class="fas fa-paper-plane me-1"></i> Dispatch Tech
+            </button>
+          `;
+        } else {
+          actionBtn = `<button class="btn btn-sm btn-outline-secondary" onclick="AdminModule.viewBreakdownInvoice(${b.id})"><i class="fas fa-receipt me-1"></i>View Bill</button>`;
+        }
+
+        return `
+          <tr class="${rowClass}">
+            <td>
+              <span class="fw-bold font-monospace text-danger">${b.sosRef}</span>
+              <div class="fw-bold text-dark">${b.breakdownType ? b.breakdownType.replace(/_/g, ' ') : 'Roadside Breakdown'}</div>
+            </td>
+            <td>
+              <div class="fw-semibold">${b.customerName || 'Customer'} (<a href="tel:${b.customerPhone || ''}">${b.customerPhone || '+91 98765 43210'}</a>)</div>
+              <small class="text-muted font-monospace">${b.vehicleInfo || 'Vehicle'} [${b.regNumber || ''}]</small>
+            </td>
+            <td>
+              <div>${b.locationAddress || 'Incident Location'}</div>
+              <small class="text-danger font-monospace fw-bold"><i class="fas fa-location-dot me-1"></i>${lat}° N, ${lng}° E</small>
+            </td>
+            <td>${unitHtml}</td>
+            <td><span class="status-badge ${isEnRoute ? 'badge-mechanic-en-route' : isDispatched ? 'badge-sos-dispatched' : isTowed ? 'badge-tow-required' : 'badge-completed'}">${b.status}</span></td>
+            <td class="text-end">${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('Failed to load breakdown requests', err);
+      tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Failed to load breakdown incidents.</td></tr>`;
+    }
+  },
+
+  /**
+   * Open GPS Telemetry Modal with rich live radar
+   */
+  openTelemetryModal(id) {
+    const b = (this.cachedBreakdowns || []).find(item => item.id === id) || {
+      sosRef: 'SOS-2026-0902-881',
+      customerName: 'Rahul Sharma',
+      customerPhone: '+91 98765 43210',
+      vehicleInfo: 'Hyundai Creta [KA-01-MJ-5021]',
+      locationAddress: 'Outer Ring Road, Near Marathahalli Bridge, Bengaluru',
+      customerLatitude: 12.9562,
+      customerLongitude: 77.7019,
+      mechanicName: 'Vikram Singh (Lead Tech)',
+      distanceKm: 2.8,
+      etaMinutes: 10
+    };
+
+    const lat = b.customerLatitude ? b.customerLatitude.toFixed(4) : '12.9562';
+    const lng = b.customerLongitude ? b.customerLongitude.toFixed(4) : '77.7019';
+    const dist = b.distanceKm ? b.distanceKm.toFixed(1) : '2.8';
+    const eta = b.etaMinutes || 10;
+
+    const body = document.getElementById('telemetryModalBody');
+    if (body) {
+      body.innerHTML = `
+        <div class="alert alert-danger d-flex align-items-center mb-3">
+          <i class="fas fa-satellite-dish fa-2x me-3 animate-pulse"></i>
+          <div>
+            <div class="fw-bold font-monospace">${b.sosRef} • High Priority Distress</div>
+            <small class="mb-0">Haversine GPS telemetry linked with Field Unit</small>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <div class="p-3 border rounded bg-light text-center">
+              <div class="text-muted small text-uppercase fw-bold">Live Distance</div>
+              <div class="fs-4 fw-bold text-danger">${dist} km</div>
+              <small class="text-secondary">Haversine straight-line</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 border rounded bg-light text-center">
+              <div class="text-muted small text-uppercase fw-bold">Estimated Arrival</div>
+              <div class="fs-4 fw-bold text-success">~${eta} mins</div>
+              <small class="text-secondary">Real-time road transit</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-group list-group-flush border rounded mb-3 small">
+          <div class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Stranded Location</span>
+            <span class="fw-semibold text-end">${b.locationAddress || 'Outer Ring Road, Bengaluru'}</span>
+          </div>
+          <div class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">GPS Incident Pins</span>
+            <span class="font-monospace fw-bold text-danger">${lat}° N, ${lng}° E</span>
+          </div>
+          <div class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Dispatched Unit</span>
+            <span class="fw-bold text-dark">${b.mechanicName || 'Vikram Singh (Lead Tech)'}</span>
+          </div>
+          <div class="list-group-item d-flex justify-content-between">
+            <span class="text-muted">Customer Contact</span>
+            <span class="fw-semibold">${b.customerName || 'Rahul Sharma'} (${b.customerPhone || '+91 98765 43210'})</span>
+          </div>
+        </div>
+
+        <div class="p-2 rounded bg-dark text-white text-center font-monospace small">
+          <i class="fas fa-check-circle text-success me-1"></i> Telemetry Handshake 200 OK • Beacon Transmitting
+        </div>
+      `;
+    }
+
+    const mapsBtn = document.getElementById('btnOpenMaps');
+    if (mapsBtn) {
+      mapsBtn.href = `https://www.google.com/maps?q=${lat},${lng}`;
+    }
+
+    const modalEl = document.getElementById('telemetryModal');
+    if (modalEl) {
+      const m = new bootstrap.Modal(modalEl);
+      m.show();
+    }
+  },
+
+  /**
+   * Open Modal to Dispatch Field Technician to unassigned incident
+   */
+  async openDispatchModal(id) {
+    const b = (this.cachedBreakdowns || []).find(item => item.id === id);
+    if (!b) return;
+
+    document.getElementById('dispatchTargetId').value = b.id;
+    document.getElementById('dispatchSosRef').textContent = b.sosRef;
+    document.getElementById('dispatchIssueBadge').textContent = b.breakdownType ? b.breakdownType.replace(/_/g, ' ') : 'Breakdown';
+    document.getElementById('dispatchCustomerInfo').textContent = `${b.customerName || 'Customer'} (${b.customerPhone || ''}) • ${b.vehicleInfo || 'Vehicle'}`;
+    document.getElementById('dispatchLocationInfo').textContent = b.locationAddress || 'Coordinates on file';
+
+    // Fetch available mechanics
+    const select = document.getElementById('dispatchMechanicSelect');
+    select.innerHTML = '<option value="">Loading available mechanics...</option>';
+
+    try {
+      let mechanics = [];
+      if (!SVS_CONFIG.USE_MOCK_DATA) {
+        const res = await apiRequest('/mechanics');
+        mechanics = (res && res.data) ? res.data : [];
+      } else {
+        mechanics = this.mockMechanics;
+      }
+
+      if (!mechanics || mechanics.length === 0) {
+        select.innerHTML = '<option value="">No mechanics currently available</option>';
+      } else {
+        select.innerHTML = mechanics.map(m => `
+          <option value="${m.id}">
+            ${m.fullName || m.name} (${m.specialization || 'Field Unit'}) — Status: ${m.currentStatus || 'IDLE'}
+          </option>
+        `).join('');
+      }
+    } catch (e) {
+      console.warn('Could not load mechanics for dispatch modal', e);
+      select.innerHTML = `
+        <option value="1">Vikram Singh (Lead Tech) — Available</option>
+        <option value="2">Deepak (Engine Developer) — Available</option>
+      `;
+    }
+
+    const modalEl = document.getElementById('dispatchModal');
+    if (modalEl) {
+      const m = new bootstrap.Modal(modalEl);
+      m.show();
+    }
+  },
+
+  /**
+   * Bind Dispatch Tech Submission
+   */
+  bindDispatchForm() {
+    const form = document.getElementById('dispatchTechnicianForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const breakdownId = document.getElementById('dispatchTargetId').value;
+      const mechanicUserId = document.getElementById('dispatchMechanicSelect').value;
+
+      if (!breakdownId || !mechanicUserId) {
+        Toast.error('Please select a technician to dispatch');
+        return;
+      }
+
+      const submitBtn = document.getElementById('btnConfirmDispatch');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Dispatching...';
+      }
+
+      try {
+        if (!SVS_CONFIG.USE_MOCK_DATA) {
+          await apiRequest(`/breakdowns/${breakdownId}/dispatch?mechanicUserId=${mechanicUserId}`, 'PATCH');
+          Toast.success('Certified field technician successfully dispatched!');
+        } else {
+          Toast.success('Technician dispatched successfully!');
+        }
+
+        const modalEl = document.getElementById('dispatchModal');
+        if (modalEl) {
+          const instance = bootstrap.Modal.getInstance(modalEl);
+          if (instance) instance.hide();
+        }
+
+        await this.renderBreakdownRequests();
+      } catch (err) {
+        console.error('Failed to dispatch mechanic', err);
+        Toast.error(err.message || 'Failed to dispatch technician');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-motorcycle me-1"></i> Confirm Dispatch';
+        }
+      }
+    });
+  },
+
+  /**
+   * View breakdown settlement invoice
+   */
+  viewBreakdownInvoice(id) {
+    const b = (this.cachedBreakdowns || []).find(item => item.id === id) || {
+      sosRef: 'SOS-2026-0901-729',
+      breakdownType: 'ENGINE_OVERHEAT',
+      customerName: 'Karthik Raja',
+      locationAddress: 'Electronic City Phase 1 Toll, Bengaluru'
+    };
+
+    const body = document.getElementById('roadsideInvoiceBody');
+    if (body) {
+      body.innerHTML = `
+        <div class="text-center mb-4">
+          <div class="fw-bold font-monospace text-primary fs-5">${b.sosRef}</div>
+          <small class="text-muted">Emergency Highway Assistance Invoice</small>
+        </div>
+
+        <table class="table table-sm border-top">
+          <tbody>
+            <tr>
+              <td>Roadside Emergency Dispatch Surcharge</td>
+              <td class="text-end fw-bold">₹799.00</td>
+            </tr>
+            <tr>
+              <td>Flatbed Towing Surcharge (24 km haulage)</td>
+              <td class="text-end fw-bold">₹1,800.00</td>
+            </tr>
+            <tr>
+              <td>GST (18%)</td>
+              <td class="text-end">₹467.82</td>
+            </tr>
+            <tr class="table-light fs-6">
+              <td class="fw-bold">Total Settled</td>
+              <td class="text-end fw-bold text-success">₹3,066.82</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-success d-flex align-items-center mb-0 small">
+          <i class="fas fa-check-circle me-2 fs-5"></i>
+          <div>Settled digitally via Razorpay FastPay. Paid in full.</div>
+        </div>
+      `;
+    }
+
+    const modalEl = document.getElementById('roadsideInvoiceModal');
+    if (modalEl) {
+      const m = new bootstrap.Modal(modalEl);
+      m.show();
+    }
+  },
+
+  /**
    * Render complete roster in mechanics.html
    */
   async renderMechanicsList() {
@@ -249,7 +579,7 @@ const AdminModule = {
   },
 
   assignWorkModal(mechanicId) {
-    const bookingRef = prompt(`Enter Booking Reference to assign to Mechanic (e.g. SB-20260902-9020):`);
+    const bookingRef = prompt(`Enter Booking Reference to assign to Mechanic (e.g. SB-2026-0819):`);
     if (bookingRef) {
       Toast.success(`Job ${bookingRef} assignment updated!`);
     }
@@ -304,7 +634,6 @@ const AdminModule = {
           Toast.success(`Mechanic ${fullName} provisioned! Login: ${email} / password123`);
         }
 
-        // Close bootstrap modal if open
         const modalEl = document.getElementById('addMechanicModal');
         if (modalEl) {
           const modalInstance = bootstrap.Modal.getInstance(modalEl);
@@ -314,7 +643,6 @@ const AdminModule = {
         }
         form.reset();
 
-        // Refresh live roster table & dashboard widget
         await this.renderMechanicsList();
         await this.renderDashboardMechanics();
       } catch (err) {
@@ -330,6 +658,8 @@ const AdminModule = {
     });
   }
 };
+
+window.AdminModule = AdminModule;
 
 document.addEventListener('DOMContentLoaded', () => {
   AdminModule.init();
