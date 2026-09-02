@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface BreakdownRequestRepository extends JpaRepository<BreakdownRequest, Long> {
     List<BreakdownRequest> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
     List<BreakdownRequest> findByMechanicIdOrderByCreatedAtDesc(Long mechanicId);
+    List<BreakdownRequest> findByVehicleId(Long vehicleId);
     List<BreakdownRequest> findByStatus(BreakdownStatus status);
     List<BreakdownRequest> findByStatusIn(List<BreakdownStatus> statuses);
     Optional<BreakdownRequest> findBySosRef(String sosRef);

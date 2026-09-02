@@ -2,6 +2,10 @@ package com.svsbas.modules.vehicle.service;
 
 import com.svsbas.common.exception.BadRequestException;
 import com.svsbas.common.exception.ResourceNotFoundException;
+import com.svsbas.modules.booking.entity.ServiceBooking;
+import com.svsbas.modules.booking.repository.ServiceBookingRepository;
+import com.svsbas.modules.breakdown.entity.BreakdownRequest;
+import com.svsbas.modules.breakdown.repository.BreakdownRequestRepository;
 import com.svsbas.modules.user.entity.Role;
 import com.svsbas.modules.user.entity.User;
 import com.svsbas.modules.user.repository.UserRepository;
@@ -20,10 +24,17 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
+    private final ServiceBookingRepository bookingRepository;
+    private final BreakdownRequestRepository breakdownRepository;
 
-    public VehicleService(VehicleRepository vehicleRepository, UserRepository userRepository) {
+    public VehicleService(VehicleRepository vehicleRepository, 
+                          UserRepository userRepository,
+                          ServiceBookingRepository bookingRepository,
+                          BreakdownRequestRepository breakdownRepository) {
         this.vehicleRepository = vehicleRepository;
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
+        this.breakdownRepository = breakdownRepository;
     }
 
     @Transactional
@@ -40,11 +51,11 @@ public class VehicleService {
         Vehicle vehicle = new Vehicle(
                 user,
                 normalizedReg,
-                request.getBrand().trim(),
-                request.getModel().trim(),
+                request.getBrand(),
+                request.getModel(),
                 request.getFuelType(),
                 request.getManufactureYear(),
-                request.getCurrentMileage()
+                request.getCurrentMileage() != null ? request.getCurrentMileage() : 0
         );
 
         Vehicle saved = vehicleRepository.save(vehicle);
@@ -56,7 +67,9 @@ public class VehicleService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
 
         if (user.getRole() == Role.ROLE_ADMIN) {
-            return vehicleRepository.findAll().stream().map(VehicleResponse::new).collect(Collectors.toList());
+            return vehicleRepository.findAll().stream()
+                    .map(VehicleResponse::new)
+                    .collect(Collectors.toList());
         }
 
         return vehicleRepository.findByUserId(user.getId()).stream()
@@ -82,6 +95,19 @@ public class VehicleService {
             throw new BadRequestException("You do not have authorization to remove this vehicle");
         }
 
+        // 1. Clean up any associated service bookings to satisfy foreign key constraints
+        List<ServiceBooking> bookings = bookingRepository.findByVehicleId(id);
+        if (!bookings.isEmpty()) {
+            bookingRepository.deleteAll(bookings);
+        }
+
+        // 2. Clean up any associated breakdown requests
+        List<BreakdownRequest> breakdowns = breakdownRepository.findByVehicleId(id);
+        if (!breakdowns.isEmpty()) {
+            breakdownRepository.deleteAll(breakdowns);
+        }
+
+        // 3. Delete vehicle record
         vehicleRepository.delete(vehicle);
     }
 }

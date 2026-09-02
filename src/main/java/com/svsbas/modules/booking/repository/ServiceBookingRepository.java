@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface ServiceBookingRepository extends JpaRepository<ServiceBooking, Long> {
     List<ServiceBooking> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
     List<ServiceBooking> findByMechanicIdOrderByCreatedAtDesc(Long mechanicId);
+    List<ServiceBooking> findByVehicleId(Long vehicleId);
     List<ServiceBooking> findByStatus(BookingStatus status);
     Optional<ServiceBooking> findByBookingRef(String bookingRef);
 }

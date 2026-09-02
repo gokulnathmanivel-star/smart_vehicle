@@ -447,6 +447,10 @@ const CustomerModule = {
   }
 };
 
+// Global window attachment for HTML event handlers
+window.CustomerModule = CustomerModule;
+window.deleteVehicle = (id) => CustomerModule.deleteVehicle(id);
+
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   CustomerModule.init();
