@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/mechanics")
+@RequestMapping("/mechanics")
 @Tag(name = "Mechanics", description = "Mechanic operations, roster, and status management")
 public class MechanicController {
 
@@ -31,6 +31,15 @@ public class MechanicController {
             @RequestParam(defaultValue = "false") boolean availableOnly) {
         List<MechanicProfileResponse> list = mechanicService.getAllMechanics(availableOnly);
         return ResponseEntity.ok(ApiResponse.success(list));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Provision and register a new certified mechanic")
+    public ResponseEntity<ApiResponse<MechanicProfileResponse>> createMechanic(
+            @org.springframework.web.bind.annotation.RequestBody com.svsbas.modules.mechanic.dto.MechanicCreateRequest request) {
+        MechanicProfileResponse response = mechanicService.registerMechanic(request);
+        return new ResponseEntity<>(ApiResponse.success("Mechanic registered and credentials issued", response), org.springframework.http.HttpStatus.CREATED);
     }
 
     @GetMapping("/profile")

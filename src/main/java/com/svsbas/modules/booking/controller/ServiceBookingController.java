@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/bookings")
+@RequestMapping("/bookings")
 @Tag(name = "Service Bookings", description = "Regular workshop service slot booking and lifecycle management")
 public class ServiceBookingController {
 

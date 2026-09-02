@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/api/v1/invoices")
+@RequestMapping("/invoices")
 @Tag(name = "Billing & Invoices", description = "Dynamic cost calculation, invoicing, and PDF downloads")
 public class InvoiceController {
 

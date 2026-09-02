@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/breakdowns")
+@RequestMapping("/breakdowns")
 @Tag(name = "Breakdown Assistance (SOS)", description = "Emergency roadside assistance and dispatch management")
 public class BreakdownAssistanceController {
 

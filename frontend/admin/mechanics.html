@@ -150,28 +150,28 @@
           <h5 class="modal-title fw-bold">Register Certified Mechanic</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <form onsubmit="event.preventDefault(); alert('Mechanic account provisioned with default password.'); bootstrap.Modal.getInstance(document.getElementById('addMechanicModal')).hide();">
+        <form id="addMechanicForm">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label-custom">Full Name</label>
-              <input type="text" class="form-control form-control-custom" placeholder="e.g. Ramesh Patel" required>
+              <label class="form-label-custom" for="mechFullName">Full Name</label>
+              <input type="text" class="form-control form-control-custom" id="mechFullName" placeholder="e.g. Ramesh Patel" required>
             </div>
             <div class="mb-3">
-              <label class="form-label-custom">Email Address</label>
-              <input type="email" class="form-control form-control-custom" placeholder="ramesh.p@svsbas.com" required>
+              <label class="form-label-custom" for="mechEmail">Email Address</label>
+              <input type="email" class="form-control form-control-custom" id="mechEmail" placeholder="ramesh.p@svsbas.com" required>
             </div>
             <div class="mb-3">
-              <label class="form-label-custom">Mobile Number</label>
-              <input type="tel" class="form-control form-control-custom" placeholder="+91 98000 11223" required>
+              <label class="form-label-custom" for="mechPhone">Mobile Number</label>
+              <input type="tel" class="form-control form-control-custom" id="mechPhone" placeholder="+91 98000 11223" required>
             </div>
             <div class="mb-3">
-              <label class="form-label-custom">Specialization Area</label>
-              <input type="text" class="form-control form-control-custom" placeholder="e.g. Engine Diagnostics & Roadside SOS" required>
+              <label class="form-label-custom" for="mechSpecialization">Specialization Area</label>
+              <input type="text" class="form-control form-control-custom" id="mechSpecialization" placeholder="e.g. Engine Diagnostics & Roadside SOS" required>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-brand-primary">Save & Issue Credentials</button>
+            <button type="submit" class="btn btn-brand-primary" id="btnSubmitMechanic">Save & Issue Credentials</button>
           </div>
         </form>
       </div>

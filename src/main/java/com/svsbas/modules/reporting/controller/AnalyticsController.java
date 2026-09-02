@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/analytics")
+@RequestMapping("/analytics")
 @Tag(name = "Reporting & Analytics", description = "Operational KPIs, utilization, and revenue statistics")
 public class AnalyticsController {
 

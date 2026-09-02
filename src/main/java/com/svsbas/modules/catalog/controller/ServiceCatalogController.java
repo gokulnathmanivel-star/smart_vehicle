@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/catalog")
+@RequestMapping("/catalog")
 @Tag(name = "Service Catalog", description = "Standard service packages and tariff management")
 public class ServiceCatalogController {
 

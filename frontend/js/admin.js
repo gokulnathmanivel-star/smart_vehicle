@@ -19,6 +19,7 @@ const AdminModule = {
     await this.renderMechanicsList();
     await this.renderCatalogList();
     await this.renderCustomersList();
+    this.bindAddMechanicForm();
   },
 
   async renderDashboardStats() {
@@ -162,11 +163,71 @@ const AdminModule = {
     }
   },
 
-  editPriceModal(catalogId) {
-    const newPrice = prompt(`Update Base Price (INR):`);
-    if (newPrice && !isNaN(newPrice)) {
-      Toast.success(`Price updated to ${formatCurrency(newPrice)}!`);
-    }
+  bindAddMechanicForm() {
+    const form = document.getElementById('addMechanicForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const fullName = document.getElementById('mechFullName').value.trim();
+      const email = document.getElementById('mechEmail').value.trim();
+      const phone = document.getElementById('mechPhone').value.trim();
+      const specialization = document.getElementById('mechSpecialization').value.trim();
+
+      const submitBtn = document.getElementById('btnSubmitMechanic');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Provisioning...';
+      }
+
+      try {
+        if (!SVS_CONFIG.USE_MOCK_DATA) {
+          const payload = {
+            fullName,
+            email,
+            phone,
+            specialization,
+            password: 'password123'
+          };
+          const res = await apiRequest('/mechanics', 'POST', payload);
+          Toast.success(`Mechanic ${res.data.fullName} provisioned! Login: ${email} / password123`);
+        } else {
+          this.mockMechanics.push({
+            id: Date.now(),
+            name: fullName,
+            phone,
+            specialization,
+            status: 'IDLE',
+            rating: 5.0,
+            activeJobs: 0
+          });
+          Toast.success(`Mechanic ${fullName} provisioned! Login: ${email} / password123`);
+        }
+
+        // Close bootstrap modal if open
+        const modalEl = document.getElementById('addMechanicModal');
+        if (modalEl) {
+          const modalInstance = bootstrap.Modal.getInstance(modalEl);
+          if (modalInstance) {
+            modalInstance.hide();
+          }
+        }
+        form.reset();
+
+        // Refresh live roster table
+        await this.renderMechanicsList();
+      } catch (err) {
+        console.error('Failed to register mechanic', err);
+        const errMsg = (err && (err.message || err.error)) ? (err.message || err.error) : 'Failed to register mechanic';
+        Toast.error(errMsg);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Save & Issue Credentials';
+        }
+      }
+    });
   }
 };
 
