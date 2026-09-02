@@ -1,5 +1,9 @@
 package com.svsbas.common.config;
 
+import com.svsbas.modules.booking.entity.BookingServiceJunction;
+import com.svsbas.modules.booking.entity.BookingStatus;
+import com.svsbas.modules.booking.entity.ServiceBooking;
+import com.svsbas.modules.booking.repository.ServiceBookingRepository;
 import com.svsbas.modules.catalog.entity.ServiceCatalogItem;
 import com.svsbas.modules.catalog.entity.ServiceCategory;
 import com.svsbas.modules.catalog.repository.ServiceCatalogRepository;
@@ -19,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Configuration
 public class DataInitializer {
@@ -31,6 +36,7 @@ public class DataInitializer {
             VehicleRepository vehicleRepository,
             ServiceCatalogRepository catalogRepository,
             MechanicProfileRepository mechanicProfileRepository,
+            ServiceBookingRepository bookingRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
             // 1. Seed Users
@@ -49,29 +55,72 @@ public class DataInitializer {
                 logger.info("Created demo Mechanic account: mechanic@demo.com");
             }
 
+            User deepak = userRepository.findByEmail("deepak@gmail.com").orElse(null);
+            if (deepak == null) {
+                deepak = new User("deepak@gmail.com", "8464392875", passwordEncoder.encode("password123"), "Deepak", Role.ROLE_MECHANIC);
+                deepak = userRepository.save(deepak);
+                MechanicProfile deepakProfile = new MechanicProfile(deepak, "Engine Developer", 12.9716, 77.5946);
+                mechanicProfileRepository.save(deepakProfile);
+                logger.info("Created demo Mechanic account: deepak@gmail.com");
+            }
+
             User customer = userRepository.findByEmail("customer@demo.com").orElse(null);
+            Vehicle v1 = null;
+            Vehicle v2 = null;
             if (customer == null) {
                 customer = new User("customer@demo.com", "+91 98765 43210", passwordEncoder.encode("password123"), "Rahul Sharma", Role.ROLE_CUSTOMER);
                 customer = userRepository.save(customer);
                 logger.info("Created demo Customer account: customer@demo.com");
 
                 // Seed customer vehicles
-                Vehicle v1 = new Vehicle(customer, "KA-01-MJ-5021", "Hyundai", "Creta SX (O)", FuelType.PETROL, 2022, 28500);
-                Vehicle v2 = new Vehicle(customer, "KA-05-EV-9912", "Tata", "Nexon EV Max", FuelType.ELECTRIC, 2023, 14200);
-                vehicleRepository.save(v1);
-                vehicleRepository.save(v2);
+                v1 = new Vehicle(customer, "KA-01-MJ-5021", "Hyundai", "Creta SX (O)", FuelType.PETROL, 2022, 28500);
+                v2 = new Vehicle(customer, "KA-05-EV-9912", "Tata", "Nexon EV Max", FuelType.ELECTRIC, 2023, 14200);
+                v1 = vehicleRepository.save(v1);
+                v2 = vehicleRepository.save(v2);
                 logger.info("Created demo vehicles for customer");
+            } else {
+                v1 = vehicleRepository.findByRegNumber("KA-01-MJ-5021").orElse(null);
+                v2 = vehicleRepository.findByRegNumber("KA-05-EV-9912").orElse(null);
             }
 
             // 2. Seed Service Catalog Items
+            ServiceCatalogItem item1 = null;
+            ServiceCatalogItem item3 = null;
             if (catalogRepository.count() == 0) {
-                catalogRepository.save(new ServiceCatalogItem("SVC-GEN-01", "Comprehensive Periodic Maintenance", ServiceCategory.GENERAL_MAINTENANCE, BigDecimal.valueOf(2999.00), BigDecimal.valueOf(3.5), "Complete 40-point vehicle inspection, synthetic oil & filter change."));
+                item1 = catalogRepository.save(new ServiceCatalogItem("SVC-GEN-01", "Comprehensive Periodic Maintenance", ServiceCategory.GENERAL_MAINTENANCE, BigDecimal.valueOf(2999.00), BigDecimal.valueOf(3.5), "Complete 40-point vehicle inspection, synthetic oil & filter change."));
                 catalogRepository.save(new ServiceCatalogItem("SVC-ENG-02", "Synthetic Engine Oil & Filter Flush", ServiceCategory.ENGINE_REPAIR, BigDecimal.valueOf(1850.00), BigDecimal.valueOf(1.0), "High-grade 5W-30 synthetic oil with OEM filter."));
-                catalogRepository.save(new ServiceCatalogItem("SVC-BRK-03", "Brake Pad Inspection & Fluid Replacement", ServiceCategory.TYRES_BRAKES, BigDecimal.valueOf(1200.00), BigDecimal.valueOf(1.5), "Front & rear caliper cleaning, pad wear check, DOT4 flush."));
+                item3 = catalogRepository.save(new ServiceCatalogItem("SVC-BRK-03", "Brake Pad Inspection & Fluid Replacement", ServiceCategory.TYRES_BRAKES, BigDecimal.valueOf(1200.00), BigDecimal.valueOf(1.5), "Front & rear caliper cleaning, pad wear check, DOT4 flush."));
                 catalogRepository.save(new ServiceCatalogItem("SVC-WHL-04", "3D Wheel Alignment & Laser Balancing", ServiceCategory.TYRES_BRAKES, BigDecimal.valueOf(950.00), BigDecimal.valueOf(1.0), "Laser computerized 4-wheel alignment and counterweights."));
                 catalogRepository.save(new ServiceCatalogItem("SVC-AC-05", "Air Conditioning & Cabin Disinfection", ServiceCategory.ELECTRICAL, BigDecimal.valueOf(1450.00), BigDecimal.valueOf(1.5), "AC gas refill, condenser coil cleaning, anti-bacterial fogging."));
                 catalogRepository.save(new ServiceCatalogItem("SVC-SOS-06", "Emergency Roadside Dispatch Surcharge", ServiceCategory.EMERGENCY_ROADSIDE, BigDecimal.valueOf(799.00), BigDecimal.valueOf(1.0), "Immediate field unit deployment and on-site troubleshooting."));
                 logger.info("Initialized Service Catalog with 6 standard service tariffs");
+            } else {
+                item1 = catalogRepository.findByServiceCode("SVC-GEN-01").orElse(null);
+                item3 = catalogRepository.findByServiceCode("SVC-BRK-03").orElse(null);
+            }
+
+            // 3. Seed Initial Service Bookings
+            if (bookingRepository.count() == 0 && customer != null && v1 != null && item1 != null) {
+                ServiceBooking b1 = new ServiceBooking(v1, customer, LocalDateTime.now().plusDays(5).withHour(11).withMinute(30).withSecond(0));
+                b1.setCustomerNotes("Periodic 30,000 km checkup and brake squeal inspection.");
+                b1.setStatus(BookingStatus.REQUESTED);
+                b1.setEstimatedCost(item1.getBasePrice());
+                BookingServiceJunction j1 = new BookingServiceJunction(b1, item1, item1.getBasePrice());
+                b1.getServices().add(j1);
+                bookingRepository.save(b1);
+
+                if (v2 != null && item3 != null) {
+                    ServiceBooking b2 = new ServiceBooking(v2, customer, LocalDateTime.now().plusDays(2).withHour(14).withMinute(30).withSecond(0));
+                    b2.setCustomerNotes("Brake pad inspection and fluid flush.");
+                    b2.setMechanic(mechanic);
+                    b2.setStatus(BookingStatus.ASSIGNED);
+                    b2.setEstimatedCost(item3.getBasePrice());
+                    BookingServiceJunction j2 = new BookingServiceJunction(b2, item3, item3.getBasePrice());
+                    b2.getServices().add(j2);
+                    bookingRepository.save(b2);
+                }
+
+                logger.info("Seeded 2 initial workshop service bookings");
             }
         };
     }

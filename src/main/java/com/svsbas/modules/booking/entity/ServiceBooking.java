@@ -64,6 +64,15 @@ public class ServiceBooking {
 
     public ServiceBooking() {}
 
+    public ServiceBooking(Vehicle vehicle, User customer, LocalDateTime preferredSlot) {
+        this.vehicle = vehicle;
+        this.customer = customer;
+        this.preferredSlot = preferredSlot;
+        this.bookingRef = "SB-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        this.status = BookingStatus.REQUESTED;
+        this.estimatedCost = BigDecimal.ZERO;
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
