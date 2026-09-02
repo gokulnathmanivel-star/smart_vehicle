@@ -105,18 +105,41 @@ public class DataInitializer {
                 item3 = catalogRepository.findByServiceCode("SVC-BRK-03").orElse(null);
             }
 
-            // 3. Seed Initial Workshop Service Bookings assigned to Vikram Singh
+            // 3. Seed Initial Workshop Service Bookings
             if (bookingRepository.count() == 0 && customer != null && v1 != null && item1 != null) {
-                ServiceBooking b1 = new ServiceBooking(v1, customer, LocalDateTime.now().plusDays(2).withHour(10).withMinute(30).withSecond(0));
+                // Booking 1: Assigned to Vikram Singh (Ready for Reassign)
+                ServiceBooking b1 = new ServiceBooking(v1, customer, LocalDateTime.now().plusDays(5).withHour(10).withMinute(30).withSecond(0));
                 b1.setBookingRef("SB-2026-0819");
-                b1.setCustomerNotes("Scheduled 30,000 km periodic service + slight brake squeal");
+                b1.setCustomerNotes("Periodic 30,000 km maintenance + front brake inspection");
                 b1.setMechanic(mechanic);
-                b1.setStatus(BookingStatus.IN_PROGRESS);
+                b1.setStatus(BookingStatus.ASSIGNED);
                 b1.setEstimatedCost(item1.getBasePrice());
                 BookingServiceJunction j1 = new BookingServiceJunction(b1, item1, item1.getBasePrice());
                 b1.getServices().add(j1);
                 bookingRepository.save(b1);
-                logger.info("Seeded active workshop booking SB-2026-0819 assigned to Vikram Singh");
+
+                // Booking 2: Unassigned / Requested (Ready for Assign Tech)
+                if (v2 != null && item3 != null) {
+                    ServiceBooking b2 = new ServiceBooking(v2, customer, LocalDateTime.now().plusDays(6).withHour(14).withMinute(0).withSecond(0));
+                    b2.setBookingRef("SB-2026-0820");
+                    b2.setCustomerNotes("Air conditioning inspection and cabin filter flush");
+                    b2.setStatus(BookingStatus.REQUESTED);
+                    b2.setEstimatedCost(item3.getBasePrice());
+                    BookingServiceJunction j2 = new BookingServiceJunction(b2, item3, item3.getBasePrice());
+                    b2.getServices().add(j2);
+                    bookingRepository.save(b2);
+                }
+
+                // Booking 3: Completed (Ready for Invoice)
+                ServiceBooking b3 = new ServiceBooking(v1, customer, LocalDateTime.now().minusDays(10).withHour(14).withMinute(0).withSecond(0));
+                b3.setBookingRef("SB-2026-0518");
+                b3.setCustomerNotes("High Voltage System & Battery Health Diagnostics");
+                b3.setMechanic(mechanic);
+                b3.setStatus(BookingStatus.COMPLETED);
+                b3.setEstimatedCost(BigDecimal.valueOf(3200.00));
+                bookingRepository.save(b3);
+
+                logger.info("Seeded 3 workshop service bookings (Assigned, Requested, Completed)");
             }
 
             // 4. Seed Initial Emergency Roadside SOS Dispatches

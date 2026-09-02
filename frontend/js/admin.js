@@ -14,17 +14,21 @@ const AdminModule = {
   mockBreakdowns: [],
   mockCatalog: [],
   mockCustomers: [],
+  cachedBookings: [],
+  cachedBreakdowns: [],
 
   async init() {
     await this.renderDashboardStats();
     await this.renderDashboardBookings();
     await this.renderDashboardMechanics();
+    await this.renderServiceBookingsList();
+    await this.renderBreakdownRequests();
     await this.renderMechanicsList();
     await this.renderCatalogList();
     await this.renderCustomersList();
-    await this.renderBreakdownRequests();
     this.bindAddMechanicForm();
     this.bindDispatchForm();
+    this.bindBookingAssignmentForm();
   },
 
   /**
@@ -139,6 +143,254 @@ const AdminModule = {
       `).join('');
     } catch (err) {
       console.error('Failed to load dashboard mechanics widget', err);
+    }
+  },
+
+  /**
+   * Render complete Workshop Service Bookings Queue in service-requests.html
+   */
+  async renderServiceBookingsList() {
+    const tableBody = document.getElementById('adminServiceBookingsTableBody');
+    if (!tableBody) return;
+
+    try {
+      let bookings = [];
+      if (!SVS_CONFIG.USE_MOCK_DATA) {
+        const res = await apiRequest('/bookings');
+        bookings = (res && res.data) ? res.data : [];
+      }
+
+      this.cachedBookings = bookings;
+
+      const pendingBadge = document.getElementById('badgePendingBookings');
+      if (pendingBadge) {
+        const pendingCount = bookings.filter(b => b.status === 'REQUESTED' || !b.mechanicName).length;
+        pendingBadge.textContent = `Pending Assignment: ${pendingCount}`;
+      }
+
+      if (!bookings || bookings.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No workshop service orders in queue.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = bookings.map(b => {
+        const isAssigned = b.status === 'ASSIGNED' || b.status === 'IN_PROGRESS';
+        const isRequested = b.status === 'REQUESTED';
+        const isCompleted = b.status === 'COMPLETED' || b.status === 'INVOICED';
+
+        const formattedSlot = b.preferredSlot 
+          ? new Date(b.preferredSlot).toLocaleString('en-IN', { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })
+          : 'Scheduled';
+
+        const servicesStr = (b.services && b.services.length) ? b.services.join(', ') : 'General Periodic Maintenance';
+
+        let mechBadge = '';
+        if (b.mechanicName) {
+          mechBadge = `<span class="badge bg-light text-dark border">${b.mechanicName}</span>`;
+        } else {
+          mechBadge = `<span class="badge bg-warning-subtle text-warning">Unassigned</span>`;
+        }
+
+        let actionBtn = '';
+        if (isAssigned) {
+          actionBtn = `<button class="btn btn-sm btn-outline-primary" onclick="AdminModule.openAssignBookingModal(${b.id})">Reassign</button>`;
+        } else if (isRequested) {
+          actionBtn = `<button class="btn btn-sm btn-brand-primary" onclick="AdminModule.openAssignBookingModal(${b.id})">Assign Tech</button>`;
+        } else {
+          actionBtn = `<button class="btn btn-sm btn-outline-secondary" onclick="AdminModule.openServiceInvoiceModal(${b.id})">Invoice</button>`;
+        }
+
+        return `
+          <tr>
+            <td><span class="fw-bold font-monospace text-primary">${b.bookingRef}</span></td>
+            <td>
+              <div class="fw-bold text-dark">${b.customerName || 'Customer'}</div>
+              <small class="text-muted font-monospace">${b.vehicleInfo || 'Vehicle'} [${b.regNumber || ''}]</small>
+            </td>
+            <td><small class="text-dark">${servicesStr}</small></td>
+            <td>${formattedSlot}</td>
+            <td>${mechBadge}</td>
+            <td>${getStatusBadge(b.status)}</td>
+            <td class="text-end">${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('Failed to load service bookings list', err);
+      tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Failed to load service bookings.</td></tr>`;
+    }
+  },
+
+  /**
+   * Open Modal to Assign or Reassign Mechanic to Workshop Booking
+   */
+  async openAssignBookingModal(bookingId) {
+    const b = (this.cachedBookings || []).find(item => item.id === bookingId);
+    if (!b) return;
+
+    document.getElementById('assignTargetBookingId').value = b.id;
+    document.getElementById('assignBookingRef').textContent = b.bookingRef;
+    document.getElementById('assignBookingStatusBadge').textContent = b.status;
+    document.getElementById('assignBookingCustomerInfo').textContent = `${b.customerName || 'Customer'} (${b.customerPhone || '+91 98765 43210'})`;
+    document.getElementById('assignBookingVehicleInfo').textContent = `${b.vehicleInfo || 'Vehicle'} [${b.regNumber || ''}]`;
+    document.getElementById('assignBookingServicesInfo').textContent = (b.services && b.services.length) ? b.services.join(', ') : 'Periodic Maintenance';
+
+    const select = document.getElementById('assignBookingMechanicSelect');
+    select.innerHTML = '<option value="">Loading technicians...</option>';
+
+    try {
+      let mechanics = [];
+      if (!SVS_CONFIG.USE_MOCK_DATA) {
+        const res = await apiRequest('/mechanics');
+        mechanics = (res && res.data) ? res.data : [];
+      } else {
+        mechanics = this.mockMechanics;
+      }
+
+      select.innerHTML = mechanics.map(m => `
+        <option value="${m.id}" ${b.mechanicId === m.id ? 'selected' : ''}>
+          ${m.fullName || m.name} (${m.specialization || 'Technician'}) — ${m.currentStatus || 'Available'}
+        </option>
+      `).join('');
+    } catch (e) {
+      console.warn('Could not load mechanics for booking assignment', e);
+      select.innerHTML = `
+        <option value="1">Vikram Singh (Lead Tech) — Available</option>
+        <option value="2">Deepak (Engine Developer) — Available</option>
+      `;
+    }
+
+    const modalEl = document.getElementById('assignBookingModal');
+    if (modalEl) {
+      const m = new bootstrap.Modal(modalEl);
+      m.show();
+    }
+  },
+
+  /**
+   * Bind Booking Assignment Submission
+   */
+  bindBookingAssignmentForm() {
+    const form = document.getElementById('assignBookingForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bookingId = document.getElementById('assignTargetBookingId').value;
+      const mechanicUserId = document.getElementById('assignBookingMechanicSelect').value;
+
+      if (!bookingId || !mechanicUserId) {
+        Toast.error('Please select a technician');
+        return;
+      }
+
+      const submitBtn = document.getElementById('btnConfirmAssignBooking');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+      }
+
+      try {
+        if (!SVS_CONFIG.USE_MOCK_DATA) {
+          await apiRequest(`/bookings/${bookingId}/assign`, 'PATCH', {
+            mechanicUserId: Number(mechanicUserId)
+          });
+          Toast.success('Technician assigned successfully to service booking!');
+        } else {
+          Toast.success('Technician assigned successfully!');
+        }
+
+        const modalEl = document.getElementById('assignBookingModal');
+        if (modalEl) {
+          const instance = bootstrap.Modal.getInstance(modalEl);
+          if (instance) instance.hide();
+        }
+
+        await this.renderServiceBookingsList();
+      } catch (err) {
+        console.error('Failed to assign mechanic to booking', err);
+        Toast.error(err.message || 'Failed to assign technician');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Save Assignment';
+        }
+      }
+    });
+  },
+
+  /**
+   * Open Workshop Service Invoice Modal
+   */
+  openServiceInvoiceModal(bookingId) {
+    const b = (this.cachedBookings || []).find(item => item.id === bookingId) || {
+      bookingRef: 'SB-2026-0518',
+      customerName: 'Rahul Sharma',
+      vehicleInfo: 'Tata Nexon EV [KA-05-EV-9912]',
+      estimatedCost: 3200
+    };
+
+    const cost = b.estimatedCost || 3200;
+    const gst = Math.round(cost * 0.18 * 100) / 100;
+    const total = cost + gst;
+
+    const body = document.getElementById('serviceInvoiceModalBody');
+    if (body) {
+      body.innerHTML = `
+        <div class="text-center mb-4">
+          <div class="fw-bold font-monospace text-primary fs-5">${b.bookingRef}</div>
+          <small class="text-muted">Workshop Service & Maintenance Settlement</small>
+        </div>
+
+        <div class="bg-light p-3 rounded mb-3 small">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Customer:</span>
+            <span class="fw-bold text-dark">${b.customerName || 'Rahul Sharma'}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Vehicle:</span>
+            <span class="fw-semibold">${b.vehicleInfo || 'Tata Nexon EV'}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Status:</span>
+            <span class="badge bg-success-subtle text-success">COMPLETED & SETTLED</span>
+          </div>
+        </div>
+
+        <table class="table table-sm border-top">
+          <thead>
+            <tr>
+              <th>Service Item</th>
+              <th class="text-end">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${(b.services && b.services.length) ? b.services.join(', ') : 'High Voltage System Diagnostics & Inspection'}</td>
+              <td class="text-end fw-bold">₹${cost.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td>GST (18%)</td>
+              <td class="text-end">₹${gst.toFixed(2)}</td>
+            </tr>
+            <tr class="table-light fs-6">
+              <td class="fw-bold">Total Settled</td>
+              <td class="text-end fw-bold text-success">₹${total.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-success d-flex align-items-center mb-0 small">
+          <i class="fas fa-check-circle me-2 fs-5"></i>
+          <div>Payment received via UPI / Razorpay. Settled in full.</div>
+        </div>
+      `;
+    }
+
+    const modalEl = document.getElementById('serviceInvoiceModal');
+    if (modalEl) {
+      const m = new bootstrap.Modal(modalEl);
+      m.show();
     }
   },
 
@@ -328,7 +580,6 @@ const AdminModule = {
     document.getElementById('dispatchCustomerInfo').textContent = `${b.customerName || 'Customer'} (${b.customerPhone || ''}) • ${b.vehicleInfo || 'Vehicle'}`;
     document.getElementById('dispatchLocationInfo').textContent = b.locationAddress || 'Coordinates on file';
 
-    // Fetch available mechanics
     const select = document.getElementById('dispatchMechanicSelect');
     select.innerHTML = '<option value="">Loading available mechanics...</option>';
 
