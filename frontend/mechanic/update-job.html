@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Job & Parts Log | SVS-BAS Mechanic</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-car-burst text-warning"></i>
+        <span>SVS-BAS</span>
+        <span class="badge bg-warning text-dark ms-1 text-uppercase" style="font-size:0.65rem;">Tech</span>
+      </div>
+
+      <ul class="sidebar-nav">
+        <li class="sidebar-section-title">Field Operations</li>
+        <li class="sidebar-item">
+          <a href="dashboard.html" class="sidebar-link">
+            <i class="fas fa-gauge"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="assigned-jobs.html" class="sidebar-link">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Assigned Jobs</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="update-job.html" class="sidebar-link active">
+            <i class="fas fa-wrench"></i>
+            <span>Update Work Log</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="user-mini-card">
+          <div class="user-avatar bg-warning text-dark fw-bold">V</div>
+          <div class="user-details">
+            <div class="name">Vikram Singh</div>
+            <div class="role-badge">Lead Field Tech</div>
+          </div>
+          <button class="btn btn-sm btn-outline-light ms-auto btn-logout" title="Sign Out">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="d-flex align-items-center gap-3">
+          <button type="button" class="sidebar-toggler-btn" id="sidebarToggler">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h5 class="mb-0 fw-bold text-dark">Job Execution & Billing Logger</h5>
+        </div>
+
+        <div class="topbar-actions">
+          <a href="assigned-jobs.html" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Back to Queue
+          </a>
+        </div>
+      </header>
+
+      <div class="app-content">
+        
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            
+            <!-- Job Overview Card -->
+            <div class="card card-custom p-4 mb-4 border-start border-4 border-warning">
+              <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <div>
+                  <span class="badge bg-warning text-dark font-monospace mb-1" id="jobDisplayRef">SB-2026-0819</span>
+                  <h4 class="fw-bold mb-1" id="jobDisplayVehicle">Hyundai Creta SX (O) [KA-01-MJ-5021]</h4>
+                  <p class="text-secondary small mb-0">
+                    <i class="fas fa-user text-muted me-1"></i><strong>Customer:</strong> <span id="jobDisplayCustomer">Rahul Sharma (+91 98765 43210)</span>
+                  </p>
+                </div>
+                <div>
+                  <a href="tel:+919876543210" class="btn btn-sm btn-success">
+                    <i class="fas fa-phone-alt me-1"></i> Contact Customer
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form: Job Status, Labor, and Work Notes -->
+            <div class="card card-custom p-4 p-md-5 mb-4">
+              <h5 class="fw-bold text-dark mb-3"><i class="fas fa-clipboard-check text-primary me-2"></i>Status & Labor Progression</h5>
+
+              <form id="mechanicJobUpdateForm">
+                
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="jobStatusSelect" class="form-label-custom">Lifecycle Status</label>
+                    <select class="form-select form-select-custom" id="jobStatusSelect" required>
+                      <option value="ASSIGNED">ASSIGNED (Work Pending)</option>
+                      <option value="IN_PROGRESS" selected>IN_PROGRESS (Under Repair)</option>
+                      <option value="INVOICED">INVOICED (Ready for Settlement)</option>
+                      <option value="COMPLETED">COMPLETED (Delivered to Customer)</option>
+                      <option value="MECHANIC_EN_ROUTE">MECHANIC_EN_ROUTE (Roadside Transit)</option>
+                      <option value="ON_SITE">ON_SITE (At Incident Location)</option>
+                      <option value="RESOLVED">RESOLVED (Roadside Fix Complete)</option>
+                      <option value="TOW_REQUIRED">TOW_REQUIRED (Workshop Intake Needed)</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="jobLaborHours" class="form-label-custom">Actual Labor Time (Hours)</label>
+                    <input type="number" step="0.5" class="form-control form-control-custom" id="jobLaborHours" value="2.5" required>
+                    <small class="text-muted">Standard rate: ₹450 / hour</small>
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label for="jobWorkNotes" class="form-label-custom">Diagnostic & Work Performed Notes</label>
+                  <textarea class="form-control form-control-custom" id="jobWorkNotes" rows="3" placeholder="Detail any findings, fluid top-ups, torque specifications, or test drive observations...">Replaced engine oil with 5W-30 synthetic, replaced air filter cartridge, checked front brake pads (wear at 65%, cleaned calipers).</textarea>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Parts Used Logger -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="fw-bold text-dark mb-0"><i class="fas fa-boxes-stacked text-primary me-2"></i>Replacement Parts & Materials Used</h5>
+                  <button type="button" class="btn btn-sm btn-outline-primary" onclick="addPartRow()">
+                    <i class="fas fa-plus me-1"></i> Add Part Item
+                  </button>
+                </div>
+
+                <div class="table-responsive mb-3">
+                  <table class="table table-bordered table-sm align-middle" id="partsTable">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Part Description / SKU</th>
+                        <th style="width: 120px;" class="text-center">Qty</th>
+                        <th style="width: 160px;" class="text-end">Unit Price (₹)</th>
+                        <th style="width: 160px;" class="text-end">Subtotal</th>
+                        <th style="width: 60px;" class="text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="partsTableBody">
+                      <tr>
+                        <td><input type="text" class="form-control form-control-sm" value="Fully Synthetic Engine Oil 5W-30 (3.5L)"></td>
+                        <td><input type="number" class="form-control form-control-sm text-center" value="1" min="1" onchange="recalcParts()"></td>
+                        <td><input type="number" class="form-control form-control-sm text-end" value="1450" onchange="recalcParts()"></td>
+                        <td class="text-end fw-bold part-subtotal">₹1,450.00</td>
+                        <td class="text-center"><button type="button" class="btn btn-sm text-danger" onclick="this.closest('tr').remove(); recalcParts();"><i class="fas fa-trash"></i></button></td>
+                      </tr>
+                      <tr>
+                        <td><input type="text" class="form-control form-control-sm" value="High-Flow Engine Air Filter"></td>
+                        <td><input type="number" class="form-control form-control-sm text-center" value="1" min="1" onchange="recalcParts()"></td>
+                        <td><input type="number" class="form-control form-control-sm text-end" value="450" onchange="recalcParts()"></td>
+                        <td class="text-end fw-bold part-subtotal">₹450.00</td>
+                        <td class="text-center"><button type="button" class="btn btn-sm text-danger" onclick="this.closest('tr').remove(); recalcParts();"><i class="fas fa-trash"></i></button></td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr class="table-light">
+                        <td colspan="3" class="text-end fw-bold">Total Parts & Consumables:</td>
+                        <td class="text-end fw-bold text-primary" id="totalPartsDisplay">₹1,900.00</td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center border-top pt-4 mt-4">
+                  <a href="assigned-jobs.html" class="btn btn-brand-outline">Back</a>
+                  <button type="submit" class="btn btn-brand-primary">
+                    <i class="fas fa-save me-1"></i> Update Work Log & Save Status
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/mechanic.js"></script>
+  <script>
+    function addPartRow() {
+      const tbody = document.getElementById('partsTableBody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" class="form-control form-control-sm" placeholder="e.g. Brake Caliper Seal Kit" required></td>
+        <td><input type="number" class="form-control form-control-sm text-center" value="1" min="1" onchange="recalcParts()"></td>
+        <td><input type="number" class="form-control form-control-sm text-end" value="500" onchange="recalcParts()"></td>
+        <td class="text-end fw-bold part-subtotal">₹500.00</td>
+        <td class="text-center"><button type="button" class="btn btn-sm text-danger" onclick="this.closest('tr').remove(); recalcParts();"><i class="fas fa-trash"></i></button></td>
+      `;
+      tbody.appendChild(tr);
+      recalcParts();
+    }
+
+    function recalcParts() {
+      let total = 0;
+      const rows = document.querySelectorAll('#partsTableBody tr');
+      rows.forEach(r => {
+        const qty = parseFloat(r.querySelector('td:nth-child(2) input').value || 1);
+        const price = parseFloat(r.querySelector('td:nth-child(3) input').value || 0);
+        const sub = qty * price;
+        r.querySelector('.part-subtotal').textContent = formatCurrency(sub);
+        total += sub;
+      });
+      document.getElementById('totalPartsDisplay').textContent = formatCurrency(total);
+    }
+  </script>
+</body>
+</html>

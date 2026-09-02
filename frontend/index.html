@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVS-BAS | Smart Vehicle Service & 24/7 Breakdown Assistance</title>
+  
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Custom Automotive Theme Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Announcement / Hotline Bar -->
+  <div class="bg-slate-dark text-white py-1 px-3 border-bottom border-secondary border-opacity-25 small d-none d-md-block">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div>
+        <span class="badge bg-danger me-2"><i class="fas fa-bolt me-1"></i>24/7 EMERGENCY SOS HOTLINE</span>
+        <span class="text-light opacity-75">Toll-Free Roadside Dispatch: <strong>1800-419-HELP (4357)</strong></span>
+      </div>
+      <div class="d-flex align-items-center gap-3 text-light opacity-75">
+        <span><i class="fas fa-map-marker-alt me-1 text-primary"></i>50+ Service Hubs Active</span>
+        <span>|</span>
+        <span class="badge bg-success-subtle text-success fw-bold"><i class="fas fa-satellite-dish me-1"></i>GPS Radar Online</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Bar -->
+  <nav class="navbar navbar-expand-lg public-navbar">
+    <div class="container">
+      <a class="navbar-brand navbar-brand-logo" href="index.html">
+        <i class="fas fa-car-burst"></i>
+        <span>SVS-BAS</span>
+        <span class="badge-pro">Enterprise</span>
+      </a>
+
+      <button class="navbar-toggler text-white border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#publicNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="publicNav">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom active" href="#overview">Overview</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="#services">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="#how-it-works">How It Works</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="#roles">Portals</a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-2">
+          <!-- SOS Emergency Direct Action -->
+          <a href="customer/breakdown.html" class="btn btn-sos me-2 py-2 px-3">
+            <span class="pulse-dot"></span>
+            <span>SOS Emergency</span>
+          </a>
+          <a href="login.html" class="btn btn-outline-light px-3 py-2 fw-semibold">Sign In</a>
+          <a href="register.html" class="btn btn-brand-primary px-3 py-2">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero-wrapper" id="overview">
+    <div class="container position-relative" style="z-index: 2;">
+      <div class="row align-items-center">
+        <div class="col-lg-7 mb-5 mb-lg-0">
+          <div class="d-inline-flex align-items-center gap-2 bg-primary bg-opacity-25 border border-primary border-opacity-50 text-light rounded-pill px-3 py-1 mb-3 small">
+            <i class="fas fa-shield-halved text-info"></i>
+            <span>Intelligent Automotive Care & Breakdown Network</span>
+          </div>
+
+          <h1 class="hero-title">
+            Smart Garage Care & <br>
+            <span class="text-highlight">24/7 Roadside Assistance</span>
+          </h1>
+
+          <p class="hero-subtitle">
+            From seamless periodic workshop maintenance to rapid emergency roadside mechanic dispatch with live GPS tracking, SVS-BAS delivers end-to-end reliability for modern vehicles.
+          </p>
+
+          <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+            <a href="customer/breakdown.html" class="btn btn-sos">
+              <i class="fas fa-truck-pickup"></i>
+              <span>Request SOS Breakdown</span>
+            </a>
+            <a href="customer/book-service.html" class="btn btn-brand-primary">
+              <i class="fas fa-calendar-check me-2"></i>Book Garage Service
+            </a>
+          </div>
+
+          <div class="row g-3 pt-3 border-top border-light border-opacity-25 text-light">
+            <div class="col-4">
+              <div class="h3 fw-bold mb-0 text-info">15 Mins</div>
+              <small class="opacity-75">Avg. Roadside ETA</small>
+            </div>
+            <div class="col-4">
+              <div class="h3 fw-bold mb-0 text-success">100%</div>
+              <small class="opacity-75">Transparent Pricing</small>
+            </div>
+            <div class="col-4">
+              <div class="h3 fw-bold mb-0 text-warning">4.9/5</div>
+              <small class="opacity-75">Mechanic Rating</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="card card-custom p-4 shadow-lg border-0 bg-white text-dark">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-bolt text-danger me-2"></i>Instant Action Hub</h5>
+              <span class="badge bg-danger-subtle text-danger fw-bold">Live Status</span>
+            </div>
+            <p class="text-secondary small mb-3">Select your portal or trigger an on-the-spot vehicle diagnostic assistance ticket.</p>
+
+            <div class="d-grid gap-2 mb-3">
+              <a href="customer/dashboard.html" class="btn btn-outline-primary text-start p-3 d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-bold"><i class="fas fa-user-circle me-2 text-primary"></i>Customer Garage Portal</div>
+                  <small class="text-muted">Manage vehicles, book slots & review invoices</small>
+                </div>
+                <i class="fas fa-chevron-right text-muted"></i>
+              </a>
+
+              <a href="mechanic/dashboard.html" class="btn btn-outline-dark text-start p-3 d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-bold"><i class="fas fa-wrench me-2 text-warning"></i>Mechanic Field Portal</div>
+                  <small class="text-muted">Accept tickets, log labor/parts & update progress</small>
+                </div>
+                <i class="fas fa-chevron-right text-muted"></i>
+              </a>
+
+              <a href="admin/dashboard.html" class="btn btn-outline-secondary text-start p-3 d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-bold"><i class="fas fa-chart-line me-2 text-success"></i>Admin Command Center</div>
+                  <small class="text-muted">Live dispatch radar, pricing catalog & analytics</small>
+                </div>
+                <i class="fas fa-chevron-right text-muted"></i>
+              </a>
+            </div>
+
+            <div class="bg-light p-3 rounded small border text-center text-muted">
+              <i class="fas fa-lock me-1"></i> Protected by Spring Security 6 & Stateless JWT RBAC
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Core Services Section -->
+  <section class="py-5 bg-white" id="services">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase px-3 py-1 mb-2">Automotive Excellence</span>
+        <h2 class="fw-bold text-dark">Comprehensive Vehicle Care Services</h2>
+        <p class="text-secondary">From routine workshop tune-ups to emergency on-highway recovery, our certified mechanics keep your vehicle in prime condition.</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Service Card 1 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card-custom p-4 h-100 card-interactive">
+            <div class="stat-icon blue mb-3">
+              <i class="fas fa-oil-can"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Periodic Maintenance</h5>
+            <p class="text-secondary small mb-3">Comprehensive 40-point vehicle inspection, synthetic oil change, filter replacements, and vital fluids top-up.</p>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+              <span class="fw-bold text-primary">From ₹2,499</span>
+              <a href="customer/book-service.html" class="btn btn-sm btn-outline-primary">Book Now</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Card 2 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card-custom p-4 h-100 card-interactive">
+            <div class="stat-icon rose mb-3">
+              <i class="fas fa-truck-medical"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Emergency SOS Breakdown</h5>
+            <p class="text-secondary small mb-3">Instant roadside assistance for flat tyres, battery jump-starts, engine overheating, and on-spot troubleshooting.</p>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+              <span class="fw-bold text-danger">Immediate Dispatch</span>
+              <a href="customer/breakdown.html" class="btn btn-sm btn-danger">Trigger SOS</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Card 3 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card-custom p-4 h-100 card-interactive">
+            <div class="stat-icon emerald mb-3">
+              <i class="fas fa-car-battery"></i>
+            </div>
+            <h5 class="fw-bold mb-2">EV & Battery Diagnostics</h5>
+            <p class="text-secondary small mb-3">High-voltage battery health scans, electrical cooling loop validation, state-of-health (SoH) and regenerative braking checks.</p>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+              <span class="fw-bold text-primary">From ₹1,850</span>
+              <a href="customer/book-service.html" class="btn btn-sm btn-outline-primary">Book Now</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Card 4 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card-custom p-4 h-100 card-interactive">
+            <div class="stat-icon amber mb-3">
+              <i class="fas fa-gauge-high"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Brakes & Suspension Tuning</h5>
+            <p class="text-secondary small mb-3">Precision brake pad replacement, disc skimming, ABS sensor calibration, and suspension strut shock absorption testing.</p>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+              <span class="fw-bold text-primary">From ₹1,500</span>
+              <a href="customer/book-service.html" class="btn btn-sm btn-outline-primary">Book Now</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Card 5 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card-custom p-4 h-100 card-interactive">
+            <div class="stat-icon indigo mb-3">
+              <i class="fas fa-microchip"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Computerized OBD Diagnostics</h5>
+            <p class="text-secondary small mb-3">Full OBD-II port fault code scanning, check-engine light triage, transmission parameter tests, and emission checks.</p>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+              <span class="fw-bold text-primary">From ₹999</span>
+              <a href="customer/book-service.html" class="btn btn-sm btn-outline-primary">Book Now</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Card 6 -->
+        <div class="col-md-6 col-lg-4">
+          <div class="card-custom p-4 h-100 card-interactive">
+            <div class="stat-icon blue mb-3">
+              <i class="fas fa-receipt"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Dynamic Invoicing & History</h5>
+            <p class="text-secondary small mb-3">Transparent digital invoices with itemized parts breakdown, standard labor charges, tax calculations, and PDF downloads.</p>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+              <span class="fw-bold text-success">Zero Hidden Fees</span>
+              <a href="customer/service-history.html" class="btn btn-sm btn-outline-secondary">View Sample</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="py-5 bg-light" id="how-it-works">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-danger-subtle text-danger fw-bold text-uppercase px-3 py-1 mb-2">Rapid Response Pipeline</span>
+        <h2 class="fw-bold text-dark">How SOS Breakdown Assistance Operates</h2>
+        <p class="text-secondary">When stranded on the road, our automated geospatial dispatch engine connects you with the nearest qualified mechanic in seconds.</p>
+      </div>
+
+      <div class="row g-4 text-center">
+        <div class="col-md-4">
+          <div class="card-custom p-4 h-100">
+            <div class="rounded-circle bg-danger text-white mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: 800;">1</div>
+            <h5 class="fw-bold mb-2">Trigger 1-Tap SOS</h5>
+            <p class="text-secondary small mb-0">Press the SOS button. Your browser Geolocation captures exact coordinates and sends an emergency distress signal.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card-custom p-4 h-100">
+            <div class="rounded-circle bg-primary text-white mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: 800;">2</div>
+            <h5 class="fw-bold mb-2">Smart Haversine Dispatch</h5>
+            <p class="text-secondary small mb-0">Our dispatch engine calculates great-circle distances and assigns the closest available mechanic with the right tools.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card-custom p-4 h-100">
+            <div class="rounded-circle bg-success text-white mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: 800;">3</div>
+            <h5 class="fw-bold mb-2">Roadside Fix & Digital Bill</h5>
+            <p class="text-secondary small mb-0">Mechanic arrives on-site, rectifies the breakdown, logs parts used, and generates an instant digital invoice.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Role Portals Grid -->
+  <section class="py-5 bg-white" id="roles">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-secondary-subtle text-dark fw-bold text-uppercase px-3 py-1 mb-2">Role Portals</span>
+        <h2 class="fw-bold text-dark">Tailored Interfaces for All Stakeholders</h2>
+        <p class="text-secondary">Access dedicated portals engineered specifically for vehicle owners, service technicians, and central dispatch administrators.</p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Customer Portal Card -->
+        <div class="col-md-4">
+          <div class="card-custom p-4 h-100 border-top border-4 border-primary">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="stat-icon blue">
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold mb-0">Customer Portal</h5>
+                <small class="text-muted">Vehicle Owners</small>
+              </div>
+            </div>
+            <ul class="list-unstyled text-secondary small mb-4">
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Multi-vehicle garage management</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Preferred slot booking wizard</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Real-time SOS tracking & ETA</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Automated service due reminders</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Digital invoice review & payment</li>
+            </ul>
+            <a href="customer/dashboard.html" class="btn btn-brand-primary w-100">Launch Customer Portal</a>
+          </div>
+        </div>
+
+        <!-- Mechanic Portal Card -->
+        <div class="col-md-4">
+          <div class="card-custom p-4 h-100 border-top border-4 border-warning">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="stat-icon amber">
+                <i class="fas fa-screwdriver-wrench"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold mb-0">Mechanic Portal</h5>
+                <small class="text-muted">Field Technicians</small>
+              </div>
+            </div>
+            <ul class="list-unstyled text-secondary small mb-4">
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Assigned work order queue</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>One-touch status progression</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Incident customer contact & map</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Parts used & labor hours logging</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Availability status toggle</li>
+            </ul>
+            <a href="mechanic/dashboard.html" class="btn btn-outline-dark w-100">Launch Mechanic Portal</a>
+          </div>
+        </div>
+
+        <!-- Admin Portal Card -->
+        <div class="col-md-4">
+          <div class="card-custom p-4 h-100 border-top border-4 border-danger">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="stat-icon rose">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold mb-0">Admin Dispatch</h5>
+                <small class="text-muted">Operations Center</small>
+              </div>
+            </div>
+            <ul class="list-unstyled text-secondary small mb-4">
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Live SOS & booking triage radar</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Smart mechanic allocation</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Service catalog & pricing control</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Customer & vehicle master records</li>
+              <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Operational revenue analytics</li>
+            </ul>
+            <a href="admin/dashboard.html" class="btn btn-outline-secondary w-100">Launch Admin Center</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Professional Footer -->
+  <footer class="bg-slate-dark text-white pt-5 pb-4 border-top border-secondary border-opacity-25">
+    <div class="container">
+      <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+          <div class="navbar-brand-logo mb-3">
+            <i class="fas fa-car-burst text-info"></i>
+            <span class="text-white">SVS-BAS</span>
+          </div>
+          <p class="text-light opacity-75 small">
+            Smart Vehicle Service and Breakdown Assistance System (SVS-BAS). An enterprise-grade academic capstone project engineered with Java Spring Boot, MySQL, Spring Security, and modern frontend technologies.
+          </p>
+          <div class="d-flex gap-2">
+            <span class="badge bg-primary">Spring Boot 3</span>
+            <span class="badge bg-info text-dark">MySQL 8</span>
+            <span class="badge bg-secondary">Vanilla JS</span>
+          </div>
+        </div>
+
+        <div class="col-6 col-lg-2">
+          <h6 class="fw-bold text-uppercase text-light mb-3 small">Customer</h6>
+          <ul class="list-unstyled small opacity-75">
+            <li class="mb-2"><a href="customer/dashboard.html" class="text-light">My Garage</a></li>
+            <li class="mb-2"><a href="customer/book-service.html" class="text-light">Book Service</a></li>
+            <li class="mb-2"><a href="customer/breakdown.html" class="text-light">Request SOS</a></li>
+            <li class="mb-2"><a href="customer/reminders.html" class="text-light">Reminders</a></li>
+          </ul>
+        </div>
+
+        <div class="col-6 col-lg-2">
+          <h6 class="fw-bold text-uppercase text-light mb-3 small">Field & Admin</h6>
+          <ul class="list-unstyled small opacity-75">
+            <li class="mb-2"><a href="mechanic/dashboard.html" class="text-light">Mechanic Jobs</a></li>
+            <li class="mb-2"><a href="admin/dashboard.html" class="text-light">Admin Dispatch</a></li>
+            <li class="mb-2"><a href="admin/mechanics.html" class="text-light">Mechanic Roster</a></li>
+            <li class="mb-2"><a href="admin/charges.html" class="text-light">Pricing Catalog</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-4">
+          <h6 class="fw-bold text-uppercase text-light mb-3 small">Emergency Breakdown Support</h6>
+          <p class="text-light opacity-75 small mb-2">In an emergency on the highway, use our 1-click GPS SOS button to alert field mechanics immediately.</p>
+          <a href="customer/breakdown.html" class="btn btn-sos w-100 py-2">
+            <i class="fas fa-truck-pickup me-1"></i> Trigger Instant SOS
+          </a>
+        </div>
+      </div>
+
+      <div class="border-top border-secondary border-opacity-25 pt-3 text-center text-light opacity-50 small">
+        &copy; 2026 Smart Vehicle Service and Breakdown Assistance System (SVS-BAS). Academic Capstone Project.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5 JS Bundle CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Global & Auth Scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

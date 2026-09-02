@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Workshop Service | SVS-BAS</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-car-burst"></i>
+        <span>SVS-BAS</span>
+      </div>
+
+      <ul class="sidebar-nav">
+        <li class="sidebar-section-title">Customer Portal</li>
+        <li class="sidebar-item">
+          <a href="dashboard.html" class="sidebar-link">
+            <i class="fas fa-gauge"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="vehicles.html" class="sidebar-link">
+            <i class="fas fa-car"></i>
+            <span>My Vehicles</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="add-vehicle.html" class="sidebar-link">
+            <i class="fas fa-plus-circle"></i>
+            <span>Add Vehicle</span>
+          </a>
+        </li>
+
+        <li class="sidebar-section-title">Maintenance & Care</li>
+        <li class="sidebar-item">
+          <a href="book-service.html" class="sidebar-link active">
+            <i class="fas fa-tools"></i>
+            <span>Book Service</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="service-history.html" class="sidebar-link">
+            <i class="fas fa-clock-rotate-left"></i>
+            <span>Service History</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="reminders.html" class="sidebar-link">
+            <i class="fas fa-bell"></i>
+            <span>Reminders</span>
+          </a>
+        </li>
+
+        <li class="sidebar-section-title">Emergency Roadside</li>
+        <li class="sidebar-item">
+          <a href="breakdown.html" class="sidebar-link text-danger fw-bold">
+            <i class="fas fa-truck-pickup"></i>
+            <span>Request SOS</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="track-request.html" class="sidebar-link">
+            <i class="fas fa-location-crosshairs"></i>
+            <span>Track SOS Status</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="user-mini-card">
+          <div class="user-avatar dynamic-user-avatar">R</div>
+          <div class="user-details">
+            <div class="name dynamic-user-name">Rahul Sharma</div>
+            <div class="role-badge dynamic-user-role">Vehicle Owner</div>
+          </div>
+          <button class="btn btn-sm btn-outline-light ms-auto btn-logout" title="Sign Out">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="d-flex align-items-center gap-3">
+          <button type="button" class="sidebar-toggler-btn" id="sidebarToggler">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h5 class="mb-0 fw-bold text-dark">Schedule Maintenance Slot</h5>
+        </div>
+      </header>
+
+      <div class="app-content">
+        
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            
+            <div class="card card-custom p-4 p-md-5 mb-4">
+              <div class="mb-4">
+                <h4 class="fw-bold mb-1">Book Regular Vehicle Service</h4>
+                <p class="text-secondary small mb-0">Select your vehicle, customized service packages, and preferred workshop appointment date</p>
+              </div>
+
+              <form id="bookServiceForm">
+                
+                <!-- 1. Select Vehicle -->
+                <div class="mb-4">
+                  <label class="form-label-custom">1. Choose Vehicle</label>
+                  <select class="form-select form-select-custom" id="bookingVehicleSelect" required>
+                    <option value="1">KA-01-MJ-5021 - Hyundai Creta SX (O) [Petrol]</option>
+                    <option value="2">KA-05-EV-9912 - Tata Nexon EV Max [Electric]</option>
+                  </select>
+                </div>
+
+                <!-- 2. Choose Service Packages -->
+                <div class="mb-4">
+                  <label class="form-label-custom">2. Select Service Packages</label>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="border rounded p-3 h-100 bg-light">
+                        <div class="form-check">
+                          <input class="form-check-input service-chk" type="checkbox" value="2999" id="pkgPeriodic" checked onchange="updateEstimatedCost()">
+                          <label class="form-check-label fw-bold text-dark" for="pkgPeriodic">
+                            Comprehensive Periodic Maintenance
+                          </label>
+                        </div>
+                        <p class="small text-secondary mt-1 mb-0 ps-4">Complete 40-point inspection, engine oil & air filter change. (₹2,999)</p>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="border rounded p-3 h-100 bg-light">
+                        <div class="form-check">
+                          <input class="form-check-input service-chk" type="checkbox" value="1200" id="pkgBrakes" checked onchange="updateEstimatedCost()">
+                          <label class="form-check-label fw-bold text-dark" for="pkgBrakes">
+                            Brake Inspection & Fluid Flush
+                          </label>
+                        </div>
+                        <p class="small text-secondary mt-1 mb-0 ps-4">Front/rear disc wear test, rotor clean, DOT4 fluid flush. (₹1,200)</p>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="border rounded p-3 h-100 bg-light">
+                        <div class="form-check">
+                          <input class="form-check-input service-chk" type="checkbox" value="950" id="pkgWheel" onchange="updateEstimatedCost()">
+                          <label class="form-check-label fw-bold text-dark" for="pkgWheel">
+                            3D Wheel Alignment & Balancing
+                          </label>
+                        </div>
+                        <p class="small text-secondary mt-1 mb-0 ps-4">Computerized 4-wheel laser alignment and weights. (₹950)</p>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6">
+                      <div class="border rounded p-3 h-100 bg-light">
+                        <div class="form-check">
+                          <input class="form-check-input service-chk" type="checkbox" value="1450" id="pkgAC" onchange="updateEstimatedCost()">
+                          <label class="form-check-label fw-bold text-dark" for="pkgAC">
+                            Air Conditioning & Cabin Disinfection
+                          </label>
+                        </div>
+                        <p class="small text-secondary mt-1 mb-0 ps-4">Condenser cleaning, gas top-up, and anti-bacterial fogging. (₹1,450)</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Preferred Date & Time -->
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                    <label for="bookingSlotDate" class="form-label-custom">3. Preferred Appointment Date</label>
+                    <input type="date" class="form-control form-control-custom" id="bookingSlotDate" required value="2026-09-08">
+                  </div>
+                  <div class="col-md-6">
+                    <label for="bookingSlotTime" class="form-label-custom">Preferred Time Slot</label>
+                    <select class="form-select form-select-custom" id="bookingSlotTime" required>
+                      <option value="09:00 AM">Morning 09:00 AM - 11:00 AM</option>
+                      <option value="11:30 AM" selected>Mid-Day 11:30 AM - 01:30 PM</option>
+                      <option value="02:30 PM">Afternoon 02:30 PM - 04:30 PM</option>
+                      <option value="05:00 PM">Evening 05:00 PM - 07:00 PM</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 4. Notes -->
+                <div class="mb-4">
+                  <label for="bookingNotes" class="form-label-custom">4. Special Instructions or Symptoms (Optional)</label>
+                  <textarea class="form-control form-control-custom" id="bookingNotes" rows="3" placeholder="Describe any unusual noises, vibrations, or specific components you'd like inspected..."></textarea>
+                </div>
+
+                <!-- Live Cost Preview Panel -->
+                <div class="card bg-light p-3 border mb-4">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="fw-bold text-dark">Estimated Service Cost</div>
+                      <small class="text-muted">Includes package charges & base labor. Parts/fluids calculated upon mechanic inspection.</small>
+                    </div>
+                    <div class="h3 fw-bold text-primary mb-0" id="estimatedCostDisplay">₹4,199.00</div>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                  <a href="dashboard.html" class="btn btn-brand-outline">Cancel</a>
+                  <button type="submit" class="btn btn-brand-primary">
+                    <i class="fas fa-check-circle me-1"></i> Confirm Booking Slot
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/customer.js"></script>
+  <script>
+    function updateEstimatedCost() {
+      let total = 0;
+      document.querySelectorAll('.service-chk:checked').forEach(chk => {
+        total += parseFloat(chk.value);
+      });
+      document.getElementById('estimatedCostDisplay').textContent = formatCurrency(total);
+    }
+  </script>
+</body>
+</html>
