@@ -16,7 +16,7 @@ const AppState = {
   token: null,
 
   init() {
-    this.token = localStorage.getItem(SVS_CONFIG.TOKEN_KEY);
+    this.token = localStorage.getItem(SVS_CONFIG.TOKEN_KEY) || localStorage.getItem('svsbas_jwt_token');
     const storedUser = localStorage.getItem(SVS_CONFIG.USER_KEY);
     if (storedUser) {
       try {
@@ -32,14 +32,20 @@ const AppState = {
     this.token = token;
     this.currentUser = user;
     localStorage.setItem(SVS_CONFIG.TOKEN_KEY, token);
-    localStorage.setItem(SVS_CONFIG.USER_KEY, JSON.stringify(user));
+    localStorage.setItem('svsbas_jwt_token', token);
+    if (user) {
+      localStorage.setItem(SVS_CONFIG.USER_KEY, JSON.stringify(user));
+      localStorage.setItem('svsbas_user_role', user.role || '');
+    }
   },
 
   clearSession() {
     this.token = null;
     this.currentUser = null;
     localStorage.removeItem(SVS_CONFIG.TOKEN_KEY);
+    localStorage.removeItem('svsbas_jwt_token');
     localStorage.removeItem(SVS_CONFIG.USER_KEY);
+    localStorage.removeItem('svsbas_user_role');
   },
 
   isAuthenticated() {

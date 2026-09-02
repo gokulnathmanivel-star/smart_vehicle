@@ -1,10 +1,11 @@
 /**
  * Smart Vehicle Service and Breakdown Assistance System (SVS-BAS)
  * Customer Operations JavaScript (customer.js)
+ * Fully connected to Spring Boot REST API
  */
 
 const CustomerModule = {
-  // Mock Data Store for Customer Context
+  // Fallback Mock Data Store (used only if offline/mock enabled)
   mockVehicles: [
     {
       id: 1,
@@ -13,8 +14,7 @@ const CustomerModule = {
       model: 'Creta SX (O)',
       fuelType: 'PETROL',
       manufactureYear: 2022,
-      mileage: 28500,
-      lastServiceDate: '2026-03-10'
+      currentMileage: 28500
     },
     {
       id: 2,
@@ -23,54 +23,11 @@ const CustomerModule = {
       model: 'Nexon EV Max',
       fuelType: 'ELECTRIC',
       manufactureYear: 2023,
-      mileage: 14200,
-      lastServiceDate: '2026-05-18'
+      currentMileage: 14200
     }
   ],
 
-  mockBookings: [
-    {
-      id: 101,
-      bookingRef: 'SB-2026-0819',
-      regNumber: 'KA-01-MJ-5021',
-      vehicleModel: 'Hyundai Creta',
-      services: ['General Periodic Maintenance', 'Engine Oil & Filter Change', 'Wheel Balancing'],
-      preferredSlot: '2026-09-08 10:30 AM',
-      mechanicName: 'Vikram Singh',
-      status: 'ASSIGNED',
-      estimatedCost: 4850.00
-    },
-    {
-      id: 98,
-      bookingRef: 'SB-2026-0518',
-      regNumber: 'KA-05-EV-9912',
-      vehicleModel: 'Tata Nexon EV Max',
-      services: ['High Voltage Battery Check', 'Brake Fluid Flush'],
-      preferredSlot: '2026-05-18 02:00 PM',
-      mechanicName: 'Suresh Kumar',
-      status: 'COMPLETED',
-      estimatedCost: 3200.00,
-      finalCost: 3200.00
-    }
-  ],
-
-  mockBreakdowns: [
-    {
-      id: 201,
-      sosRef: 'SOS-2026-0902-881',
-      regNumber: 'KA-01-MJ-5021',
-      breakdownType: 'FLAT_TYRE',
-      location: 'Outer Ring Road, Near Marathahalli Bridge, Bengaluru',
-      latitude: 12.9562,
-      longitude: 77.7019,
-      status: 'MECHANIC_EN_ROUTE',
-      mechanicName: 'Vikram Singh',
-      mechanicPhone: '+91 91234 56789',
-      estimatedEtaMinutes: 14,
-      createdAt: '2026-09-02 21:15'
-    }
-  ],
-
+  mockBookings: [],
   mockReminders: [
     {
       id: 1,
@@ -92,86 +49,185 @@ const CustomerModule = {
     }
   ],
 
-  init() {
-    this.loadVehicles();
-    this.loadBookings();
+  async init() {
+    await this.loadVehicles();
+    await this.populateVehicleSelects();
+    await this.loadBookings();
     this.loadReminders();
     this.bindAddVehicleForm();
     this.bindBookingForm();
     this.bindSosTrigger();
   },
 
-  loadVehicles() {
+  /**
+   * Load vehicles from the backend and render in the UI
+   */
+  async loadVehicles() {
     const container = document.getElementById('customerVehicleList');
     if (!container) return;
 
-    if (this.mockVehicles.length === 0) {
+    try {
       container.innerHTML = `
-        <div class="col-12 empty-state-box">
-          <div class="empty-state-icon"><i class="fas fa-car-side"></i></div>
-          <h5 class="empty-state-title">No Vehicles Registered</h5>
-          <p class="empty-state-desc">Add your first vehicle to schedule regular maintenance slots and enable 1-tap SOS assistance.</p>
-          <a href="add-vehicle.html" class="btn btn-brand-primary"><i class="fas fa-plus me-2"></i>Add Vehicle</a>
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Loading your garage from server...</p>
         </div>
       `;
-      return;
-    }
 
-    container.innerHTML = this.mockVehicles.map(v => `
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card-custom h-100 p-3 card-interactive">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <span class="badge bg-light text-dark border px-2 py-1 font-monospace fw-bold">${v.regNumber}</span>
-            <span class="badge bg-primary-subtle text-primary fw-semibold">${v.fuelType}</span>
+      let vehicles = [];
+      if (!SVS_CONFIG.USE_MOCK_DATA) {
+        const response = await apiRequest('/vehicles');
+        vehicles = (response && response.data) ? response.data : [];
+      } else {
+        vehicles = this.mockVehicles;
+      }
+
+      const countEl = document.getElementById('statCustomerVehiclesCount');
+      if (countEl) {
+        countEl.textContent = vehicles ? vehicles.length : 0;
+      }
+
+      if (!vehicles || vehicles.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 empty-state-box">
+            <div class="empty-state-icon"><i class="fas fa-car-side"></i></div>
+            <h5 class="empty-state-title">No Vehicles Registered</h5>
+            <p class="empty-state-desc">Add your first vehicle to schedule regular maintenance slots and enable 1-tap SOS assistance.</p>
+            <a href="add-vehicle.html" class="btn btn-brand-primary"><i class="fas fa-plus me-2"></i>Add Vehicle</a>
           </div>
-          <h5 class="fw-bold mb-1">${v.brand} ${v.model}</h5>
-          <p class="text-secondary small mb-3">Model Year: ${v.manufactureYear} | Mileage: ${v.mileage.toLocaleString()} km</p>
-          <div class="border-top pt-2 mt-auto d-flex justify-content-between align-items-center">
-            <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>Last Service: ${v.lastServiceDate || 'None'}</small>
-            <div>
-              <a href="book-service.html?vehicleId=${v.id}" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-tools"></i> Book</a>
-              <button class="btn btn-sm btn-outline-danger" onclick="CustomerModule.deleteVehicle(${v.id})"><i class="fas fa-trash"></i></button>
+        `;
+        return;
+      }
+
+      container.innerHTML = vehicles.map(v => {
+        const mileage = v.currentMileage != null ? v.currentMileage : (v.mileage || 0);
+        return `
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card-custom h-100 p-3 card-interactive shadow-sm border">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-light text-dark border px-2 py-1 font-monospace fw-bold fs-6">${v.regNumber}</span>
+                <span class="badge bg-primary-subtle text-primary fw-semibold">${v.fuelType}</span>
+              </div>
+              <h5 class="fw-bold mb-1">${v.brand} ${v.model}</h5>
+              <p class="text-secondary small mb-3">Model Year: ${v.manufactureYear} | Mileage: ${mileage.toLocaleString()} km</p>
+              <div class="border-top pt-2 mt-auto d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="far fa-user me-1"></i>${v.ownerName || 'Self'}</small>
+                <div>
+                  <a href="book-service.html?vehicleId=${v.id}" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-tools"></i> Book</a>
+                  <button class="btn btn-sm btn-outline-danger" onclick="CustomerModule.deleteVehicle(${v.id})"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
             </div>
           </div>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('Failed to load vehicles from server', err);
+      container.innerHTML = `
+        <div class="col-12 alert alert-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>Failed to load vehicles: ${err.message || 'Server connection error'}
         </div>
-      </div>
-    `).join('');
+      `;
+    }
   },
 
-  deleteVehicle(id) {
+  /**
+   * Delete vehicle from garage
+   */
+  async deleteVehicle(id) {
     if (!confirm('Are you sure you want to remove this vehicle from your garage?')) return;
-    this.mockVehicles = this.mockVehicles.filter(v => v.id !== id);
-    Toast.success('Vehicle removed successfully');
-    this.loadVehicles();
+    try {
+      if (!SVS_CONFIG.USE_MOCK_DATA) {
+        await apiRequest(`/vehicles/${id}`, 'DELETE');
+        Toast.success('Vehicle removed successfully from database');
+      } else {
+        this.mockVehicles = this.mockVehicles.filter(v => v.id !== id);
+        Toast.success('Vehicle removed successfully');
+      }
+      await this.loadVehicles();
+    } catch (err) {
+      console.error('Failed to delete vehicle', err);
+      Toast.error(err.message || 'Could not delete vehicle');
+    }
   },
 
-  loadBookings() {
+  /**
+   * Populate vehicle dropdowns across booking and SOS forms
+   */
+  async populateVehicleSelects() {
+    const selects = [
+      document.getElementById('bookingVehicleSelect'),
+      document.getElementById('sosVehicleSelect')
+    ].filter(Boolean);
+
+    if (selects.length === 0) return;
+
+    try {
+      let vehicles = [];
+      if (!SVS_CONFIG.USE_MOCK_DATA) {
+        const res = await apiRequest('/vehicles');
+        vehicles = (res && res.data) ? res.data : [];
+      } else {
+        vehicles = this.mockVehicles;
+      }
+
+      if (vehicles.length > 0) {
+        selects.forEach(select => {
+          select.innerHTML = vehicles.map(v => `
+            <option value="${v.id}">${v.regNumber} - ${v.brand} ${v.model} [${v.fuelType}]</option>
+          `).join('');
+        });
+      }
+    } catch (e) {
+      console.warn('Could not populate vehicle selects', e);
+    }
+  },
+
+  /**
+   * Load regular service bookings
+   */
+  async loadBookings() {
     const tableBody = document.getElementById('customerBookingsTableBody');
     if (!tableBody) return;
 
-    if (this.mockBookings.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No service bookings found.</td></tr>`;
-      return;
-    }
+    try {
+      let bookings = [];
+      if (!SVS_CONFIG.USE_MOCK_DATA) {
+        const res = await apiRequest('/bookings');
+        bookings = (res && res.data) ? res.data : [];
+      } else {
+        bookings = this.mockBookings;
+      }
 
-    tableBody.innerHTML = this.mockBookings.map(b => `
-      <tr>
-        <td class="fw-bold font-monospace">${b.bookingRef}</td>
-        <td>
-          <div class="fw-semibold">${b.vehicleModel}</div>
-          <small class="text-muted font-monospace">${b.regNumber}</small>
-        </td>
-        <td>
-          <small class="text-dark">${b.services.join(', ')}</small>
-        </td>
-        <td>${b.preferredSlot}</td>
-        <td>${b.mechanicName || '<span class="text-muted italic">Unassigned</span>'}</td>
-        <td>${getStatusBadge(b.status)}</td>
-        <td class="fw-bold text-end">${formatCurrency(b.finalCost || b.estimatedCost)}</td>
-      </tr>
-    `).join('');
+      if (!bookings || bookings.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No service bookings found.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = bookings.map(b => `
+        <tr>
+          <td class="fw-bold font-monospace">${b.bookingRef}</td>
+          <td>
+            <div class="fw-semibold">${b.vehicleInfo || b.vehicleModel || 'Vehicle'}</div>
+            <small class="text-muted font-monospace">${b.regNumber || ''}</small>
+          </td>
+          <td>
+            <small class="text-dark">${(b.services && b.services.length) ? b.services.join(', ') : 'Standard Maintenance'}</small>
+          </td>
+          <td>${b.preferredSlot ? new Date(b.preferredSlot).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Scheduled'}</td>
+          <td>${b.mechanicName || '<span class="text-muted fst-italic">Unassigned</span>'}</td>
+          <td>${getStatusBadge(b.status)}</td>
+          <td class="fw-bold text-end">${formatCurrency(b.estimatedCost || 0)}</td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      console.error('Failed to load bookings', err);
+    }
   },
 
+  /**
+   * Render maintenance reminders
+   */
   loadReminders() {
     const container = document.getElementById('remindersListContainer');
     if (!container) return;
@@ -191,112 +247,166 @@ const CustomerModule = {
     `).join('');
   },
 
+  /**
+   * Bind Add Vehicle form submission to Spring Boot REST API
+   */
   bindAddVehicleForm() {
     const form = document.getElementById('addVehicleForm');
     if (!form) return;
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const newV = {
-        id: Date.now(),
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registering Vehicle...';
+      }
+
+      const vehicleData = {
         regNumber: document.getElementById('vehRegNumber').value.trim().toUpperCase(),
         brand: document.getElementById('vehBrand').value.trim(),
         model: document.getElementById('vehModel').value.trim(),
         fuelType: document.getElementById('vehFuelType').value,
         manufactureYear: parseInt(document.getElementById('vehYear').value, 10),
-        mileage: parseInt(document.getElementById('vehMileage').value, 10),
-        lastServiceDate: 'None'
+        currentMileage: parseInt(document.getElementById('vehMileage').value, 10)
       };
 
-      this.mockVehicles.push(newV);
-      Toast.success(`Vehicle ${newV.regNumber} added to garage!`);
-      setTimeout(() => {
-        window.location.href = 'vehicles.html';
-      }, 700);
-    });
-  },
+      try {
+        if (!SVS_CONFIG.USE_MOCK_DATA) {
+          const res = await apiRequest('/vehicles', 'POST', vehicleData);
+          Toast.success(`Vehicle ${res.data.regNumber} registered successfully in database!`);
+        } else {
+          this.mockVehicles.push({ id: Date.now(), ...vehicleData });
+          Toast.success(`Vehicle ${vehicleData.regNumber} added to garage!`);
+        }
 
-  bindBookingForm() {
-    const form = document.getElementById('bookServiceForm');
-    if (!form) return;
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const vehicleSelect = document.getElementById('bookingVehicleSelect');
-      const selectedVehicleText = vehicleSelect.options[vehicleSelect.selectedIndex].text;
-      
-      const newBooking = {
-        id: Date.now(),
-        bookingRef: 'SB-2026-' + Math.floor(1000 + Math.random() * 9000),
-        regNumber: selectedVehicleText.split(' - ')[0] || 'KA-NEW',
-        vehicleModel: selectedVehicleText.split(' - ')[1] || 'Vehicle',
-        services: ['General Maintenance & Diagnostics'],
-        preferredSlot: document.getElementById('bookingSlotDate').value + ' ' + document.getElementById('bookingSlotTime').value,
-        mechanicName: null,
-        status: 'REQUESTED',
-        estimatedCost: 3500.00
-      };
-
-      this.mockBookings.unshift(newBooking);
-      Toast.success('Service slot booked successfully! Admin will assign a certified mechanic.');
-      setTimeout(() => {
-        window.location.href = 'service-history.html';
-      }, 800);
-    });
-  },
-
-  bindSosTrigger() {
-    const btn = document.getElementById('btnTriggerSos');
-    if (!btn) return;
-
-    btn.addEventListener('click', () => {
-      if (!confirm('EMERGENCY SOS: This will alert nearest field mechanics and dispatch roadside assistance. Proceed?')) return;
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i>Acquiring Precise GPS...';
-
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            CustomerModule.createSosRequest(coords);
-          },
-          (err) => {
-            console.warn('Geolocation failed or denied, using fallback city coordinates', err);
-            CustomerModule.createSosRequest({ lat: 12.9716, lng: 77.5946 }); // Default Bangalore Center
-          },
-          { enableHighAccuracy: true, timeout: 8000 }
-        );
-      } else {
-        CustomerModule.createSosRequest({ lat: 12.9716, lng: 77.5946 });
+        setTimeout(() => {
+          window.location.href = 'vehicles.html';
+        }, 700);
+      } catch (err) {
+        console.error('Failed to register vehicle', err);
+        const errMsg = (err && (err.message || err.error)) ? (err.message || err.error) : 'Failed to register vehicle. Please check inputs.';
+        Toast.error(errMsg);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Save to Garage';
+        }
       }
     });
   },
 
-  createSosRequest(coords) {
-    const newSos = {
-      id: Date.now(),
-      sosRef: 'SOS-2026-' + Math.floor(1000 + Math.random() * 9000),
-      regNumber: 'KA-01-MJ-5021',
-      breakdownType: 'CRITICAL_ASSISTANCE',
-      location: `GPS: ${coords.lat.toFixed(4)}° N, ${coords.lng.toFixed(4)}° E (Auto-located)`,
-      latitude: coords.lat,
-      longitude: coords.lng,
-      status: 'DISPATCHED',
-      mechanicName: 'Vikram Singh (Nearest Unit)',
-      mechanicPhone: '+91 91234 56789',
-      estimatedEtaMinutes: 12,
-      createdAt: 'Just now'
-    };
+  /**
+   * Bind Booking form submission to Spring Boot REST API
+   */
+  bindBookingForm() {
+    const form = document.getElementById('bookServiceForm');
+    if (!form) return;
 
-    this.mockBreakdowns.unshift(newSos);
-    Toast.success('SOS Alert Dispatched! Nearest mechanic has been notified.');
-    setTimeout(() => {
-      window.location.href = 'track-request.html?sosId=' + newSos.id;
-    }, 1000);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const vehicleSelect = document.getElementById('bookingVehicleSelect');
+      const vehicleId = parseInt(vehicleSelect.value, 10);
+      const slotDate = document.getElementById('bookingSlotDate').value;
+      const slotTime = document.getElementById('bookingSlotTime').value;
+      const notes = (document.getElementById('bookingNotes') || {}).value || '';
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming Appointment...';
+      }
+
+      try {
+        if (!SVS_CONFIG.USE_MOCK_DATA) {
+          const payload = {
+            vehicleId: vehicleId,
+            serviceCatalogIds: [1], // Comprehensive Periodic Maintenance
+            preferredSlot: `${slotDate}T${slotTime}:00`,
+            customerNotes: notes
+          };
+          const res = await apiRequest('/bookings', 'POST', payload);
+          Toast.success(`Service slot booked! Ref: ${res.data.bookingRef}`);
+        } else {
+          Toast.success('Service slot booked successfully! (Mock)');
+        }
+
+        setTimeout(() => {
+          window.location.href = 'service-history.html';
+        }, 800);
+      } catch (err) {
+        console.error('Failed to book service', err);
+        Toast.error(err.message || 'Failed to book service appointment');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i> Confirm Booking';
+        }
+      }
+    });
+  },
+
+  /**
+   * Bind Emergency SOS trigger to Spring Boot REST API
+   */
+  bindSosTrigger() {
+    const btn = document.getElementById('btnTriggerSos');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+      const vehicleSelect = document.getElementById('sosVehicleSelect');
+      const typeSelect = document.getElementById('sosTypeSelect');
+      const addressInput = document.getElementById('sosAddressInput');
+
+      const vehicleId = vehicleSelect ? parseInt(vehicleSelect.value, 10) : 1;
+      const breakdownType = typeSelect ? typeSelect.value : 'FLAT_TYRE';
+      const address = addressInput && addressInput.value.trim() ? addressInput.value.trim() : 'Current GPS Location';
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Dispatching Rapid Response...';
+
+      let lat = 12.9562;
+      let lon = 77.7019;
+
+      if (navigator.geolocation) {
+        try {
+          const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 3000 }));
+          lat = pos.coords.latitude;
+          lon = pos.coords.longitude;
+        } catch (e) {
+          console.warn('Geolocation fallback used', e);
+        }
+      }
+
+      try {
+        if (!SVS_CONFIG.USE_MOCK_DATA) {
+          const payload = {
+            vehicleId,
+            breakdownType,
+            latitude: lat,
+            longitude: lon,
+            locationAddress: address
+          };
+          const res = await apiRequest('/breakdowns/sos', 'POST', payload);
+          Toast.success(`Emergency SOS dispatched! Ref: ${res.data.sosRef}`);
+        } else {
+          Toast.success('Emergency SOS dispatched! (Mock)');
+        }
+
+        setTimeout(() => {
+          window.location.href = 'track-request.html';
+        }, 1000);
+      } catch (err) {
+        console.error('Failed to trigger SOS', err);
+        Toast.error(err.message || 'Failed to dispatch SOS alert');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-satellite-dish me-2"></i> Send Emergency SOS Alert';
+      }
+    });
   }
 };
 
+// Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   CustomerModule.init();
 });
