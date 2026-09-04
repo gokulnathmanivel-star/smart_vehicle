@@ -197,6 +197,7 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
       }
       throw new Error(data.message || 'API request failed');
     }
+    return data;
   } catch (error) {
     console.error(`API Error [${method} ${endpoint}]:`, error);
     if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('Load failed'))) {
