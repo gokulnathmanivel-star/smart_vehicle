@@ -17,7 +17,7 @@ try {
     Write-Host " Press Ctrl+C in this terminal to stop the server." -ForegroundColor Gray
     Write-Host "==========================================================" -ForegroundColor Green
 
-    Start-Process $url
+    Start-Process "${url}login.html"
 
     while ($listener.IsListening) {
         $context = $listener.GetContext()
