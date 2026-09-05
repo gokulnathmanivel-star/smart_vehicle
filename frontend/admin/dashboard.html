@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Admin Dashboard | SVS-BAS</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -113,6 +116,31 @@
       <!-- Page Body -->
       <div class="app-content">
         
+        <!-- Compact Mechanic Availability Strip -->
+        <div class="card card-custom border-0 shadow-sm p-3 mb-4 bg-white">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(16, 185, 129, 0.12); color: #10b981; font-size: 1rem;">
+                <i class="fas fa-user-gear"></i>
+              </div>
+              <div>
+                <h6 class="fw-bold mb-0 text-dark">Mechanic Availability Status</h6>
+                <small class="text-muted">Live duty roster for dispatch & workshop allocation</small>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center" id="adminTopMechanicAvailabilityStrip">
+              <div class="d-flex align-items-center gap-2 px-3 py-1 rounded border bg-light">
+                <span class="fw-bold text-dark small">Vikram Singh (Lead Tech)</span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fas fa-circle text-success me-1" style="font-size: 0.55rem;"></i> Available (IDLE)</span>
+              </div>
+              <div class="d-flex align-items-center gap-2 px-3 py-1 rounded border bg-light">
+                <span class="fw-bold text-dark small">Deepak (Engine Specialist)</span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fas fa-circle text-success me-1" style="font-size: 0.55rem;"></i> Available (IDLE)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Metric KPI Cards -->
         <div class="row g-3 mb-4">
           <div class="col-sm-6 col-lg-3">
@@ -253,8 +281,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/main.js"></script>
-  <script src="../js/auth.js"></script>
-  <script src="../js/admin.js"></script>
+  <script src="../js/main.js?v=20260905_4"></script>
+  <script src="../js/auth.js?v=20260905_4"></script>
+  <script src="../js/admin.js?v=20260905_4"></script>
 </body>
 </html>

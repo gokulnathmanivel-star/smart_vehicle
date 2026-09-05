@@ -141,6 +141,22 @@ const AdminModule = {
           </span>
         </div>
       `).join('');
+
+      const topStrip = document.getElementById('adminTopMechanicAvailabilityStrip');
+      if (topStrip && mechanics.length > 0) {
+        topStrip.innerHTML = mechanics.slice(0, 4).map(m => {
+          const isIdle = m.currentStatus === 'IDLE';
+          const badgeClass = isIdle ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning border border-warning-subtle';
+          const iconClass = isIdle ? 'text-success' : 'text-warning';
+          const statusText = isIdle ? 'Available (IDLE)' : (m.currentStatus || 'BUSY');
+          return `
+            <div class="d-flex align-items-center gap-2 px-3 py-1 rounded border bg-light">
+              <span class="fw-bold text-dark small">${m.fullName || m.name}</span>
+              <span class="badge ${badgeClass}"><i class="fas fa-circle ${iconClass} me-1" style="font-size: 0.55rem;"></i> ${statusText}</span>
+            </div>
+          `;
+        }).join('');
+      }
     } catch (err) {
       console.error('Failed to load dashboard mechanics widget', err);
     }
