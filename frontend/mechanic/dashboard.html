@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Mechanic Field Portal | SVS-BAS</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -81,20 +84,27 @@
 
       <div class="app-content">
         
-        <!-- Welcome Banner -->
-        <div class="card-custom bg-slate-dark text-white p-4 mb-4 border-0">
-          <div class="row align-items-center">
-            <div class="col-lg-8">
-              <span class="badge bg-warning text-dark px-3 py-1 mb-2 fw-bold text-uppercase font-monospace">Field Unit Active</span>
-              <h3 class="fw-bold mb-1">Welcome, Vikram Singh!</h3>
-              <p class="text-light opacity-75 mb-3">You have 1 active emergency SOS dispatch ticket and 1 workshop scheduled service ticket pending completion.</p>
-              <div class="d-flex flex-wrap gap-2">
-                <a href="assigned-jobs.html" class="btn btn-warning text-dark btn-sm fw-bold"><i class="fas fa-tools me-1"></i>Open Job Board (2 Jobs)</a>
-                <a href="update-job.html?jobId=502" class="btn btn-danger btn-sm"><i class="fas fa-truck-pickup me-1"></i>Current SOS: En Route</a>
+        <!-- Compact Mechanic Name & Availability Status -->
+        <div class="card card-custom border-0 shadow-sm p-3 mb-4 bg-white">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="user-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold fs-5 dynamic-user-avatar" style="width: 44px; height: 44px;">
+                V
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h5 class="fw-bold mb-0 text-dark dynamic-user-name">Vikram Singh</h5>
+                  <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold">
+                    <i class="fas fa-circle text-success me-1" style="font-size: 0.55rem;"></i> On Duty (Available)
+                  </span>
+                </div>
+                <small class="text-secondary">Certified Master Technician • Field Unit #04</small>
               </div>
             </div>
-            <div class="col-lg-4 text-end d-none d-lg-block">
-              <i class="fas fa-toolbox fa-5x text-white opacity-25"></i>
+            <div class="d-flex gap-2 align-items-center">
+              <a href="assigned-jobs.html" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-clipboard-list me-1"></i> View Assigned Jobs
+              </a>
             </div>
           </div>
         </div>
@@ -168,8 +178,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../js/main.js"></script>
-  <script src="../js/auth.js"></script>
-  <script src="../js/mechanic.js"></script>
+  <script src="../js/main.js?v=20260905_5"></script>
+  <script src="../js/auth.js?v=20260905_5"></script>
+  <script src="../js/mechanic.js?v=20260905_5"></script>
 </body>
 </html>
